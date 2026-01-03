@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precalculus Practice Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff00aa;
+            --accent-yellow: #ffdd00;
+            --accent-green: #00ff88;
+            --accent-orange: #ff8800;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-subtle: #2a2a3a;
+            --correct: #00ff88;
+            --incorrect: #ff4466;
+            --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease forwards;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-magenta) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease 0.1s forwards;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease 0.2s forwards;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease 0.3s forwards;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .stat-value.correct { color: var(--correct); }
+        .stat-value.incorrect { color: var(--incorrect); }
+        .stat-value.streak { color: var(--accent-yellow); }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.25rem;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease 0.4s forwards;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .sidebar-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .topic-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .topic-group-title {
+            font-size: 0.7rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topic-group-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+        }
+
+        .topic-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border-color: var(--accent-cyan);
+            transform: translateX(4px);
+        }
+
+        .topic-btn.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 170, 0.1));
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+
+        .topic-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-magenta));
+        }
+
+        .topic-btn.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .topic-btn .coming-soon {
+            font-size: 0.65rem;
+            color: var(--accent-yellow);
+            margin-left: 0.5rem;
+        }
+
+        /* Problem Area */
+        .problem-area {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem;
+            min-height: 500px;
+        }
+
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .problem-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-magenta);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .difficulty-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-badge.easy { background: rgba(0, 255, 136, 0.15); color: var(--correct); }
+        .difficulty-badge.medium { background: rgba(255, 221, 0, 0.15); color: var(--accent-yellow); }
+        .difficulty-badge.hard { background: rgba(255, 136, 0, 0.15); color: var(--accent-orange); }
+
+        .problem-content {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .problem-instruction {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .problem-expression {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            display: inline-block;
+            min-width: 300px;
+        }
+
+        .problem-expression .abs-bar {
+            color: var(--accent-cyan);
+            padding: 0 0.15em;
+        }
+        
+        .problem-expression .abs-inner {
+            padding: 0 0.25em;
+            display: inline-block;
+        }
+        
+        .problem-expression .abs-group {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* Answer Input */
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .answer-input {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            padding: 1rem 1.5rem;
+            width: 200px;
+            text-align: center;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .answer-input.correct {
+            border-color: var(--correct);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .answer-input.incorrect {
+            border-color: var(--incorrect);
+            box-shadow: 0 0 20px rgba(255, 68, 102, 0.3);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .submit-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 2rem;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback.show { display: block; }
+
+        .feedback.correct {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .feedback.incorrect {
+            background: rgba(255, 68, 102, 0.1);
+            border: 1px solid rgba(255, 68, 102, 0.3);
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feedback-icon {
+            font-size: 1.5rem;
+        }
+
+        .feedback-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .feedback.correct .feedback-title { color: var(--correct); }
+        .feedback.incorrect .feedback-title { color: var(--incorrect); }
+
+        .feedback-explanation {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .feedback-explanation code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-card);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--accent-cyan);
+        }
+
+        .next-btn {
+            margin-top: 1.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .next-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Theory Panel */
+        .theory-panel {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .theory-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .theory-toggle:hover { color: var(--text-primary); }
+
+        .theory-toggle svg {
+            transition: transform 0.3s ease;
+        }
+
+        .theory-toggle.open svg {
+            transform: rotate(180deg);
+        }
+
+        .theory-content {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .theory-content.show { display: block; }
+
+        .theory-content h4 {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .theory-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .theory-content .formula {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            color: var(--accent-yellow);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .sidebar-title {
+                width: 100%;
+            }
+
+            .topic-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 0;
+            }
+
+            .topic-group-title {
+                width: 100%;
+            }
+
+            .topic-btn {
+                width: auto;
+                flex: 1;
+                min-width: 120px;
+            }
+
+            h1 { font-size: 2.5rem; }
+
+            .stats-bar {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .problem-expression {
+                font-size: 2rem;
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">ASU Engineering Prep</div>
+            <h1>Precalc Simulator</h1>
+            <p class="subtitle">Master the fundamentals before Calculus I</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="totalProblems">0</div>
+                <div class="stat-label">Problems</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value correct" id="correctCount">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value incorrect" id="incorrectCount">0</div>
+                <div class="stat-label">Incorrect</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value streak" id="streakCount">0</div>
+                <div class="stat-label">Streak 🔥</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="sidebar-title">Problem Types</div>
+                
+                <div class="topic-group">
+                    <div class="topic-group-title">Algebra Fundamentals</div>
+                    <button class="topic-btn active" data-topic="abs-simplify">Absolute Value: Simplify</button>
+                    <button class="topic-btn" data-topic="abs-equations">Absolute Value: Equations</button>
+                    <button class="topic-btn" data-topic="abs-inequalities">Absolute Value: Inequalities</button>
+                </div>
+
+                <div class="topic-group">
+                    <div class="topic-group-title">Exponents & Radicals</div>
+                    <button class="topic-btn locked" data-topic="exponents">Exponent Laws <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="radicals">Simplify Radicals <span class="coming-soon">Soon</span></button>
+                </div>
+
+                <div class="topic-group">
+                    <div class="topic-group-title">Polynomials</div>
+                    <button class="topic-btn locked" data-topic="factoring">Factoring <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="synthetic-div">Synthetic Division <span class="coming-soon">Soon</span></button>
+                </div>
+
+                <div class="topic-group">
+                    <div class="topic-group-title">Functions</div>
+                    <button class="topic-btn locked" data-topic="domain-range">Domain & Range <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="composition">Composition <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="inverse">Inverse Functions <span class="coming-soon">Soon</span></button>
+                </div>
+
+                <div class="topic-group">
+                    <div class="topic-group-title">Trigonometry</div>
+                    <button class="topic-btn locked" data-topic="unit-circle">Unit Circle Values <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="trig-identities">Trig Identities <span class="coming-soon">Soon</span></button>
+                </div>
+
+                <div class="topic-group">
+                    <div class="topic-group-title">Logarithms</div>
+                    <button class="topic-btn locked" data-topic="log-properties">Log Properties <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn locked" data-topic="log-equations">Log Equations <span class="coming-soon">Soon</span></button>
+                </div>
+            </aside>
+
+            <main class="problem-area">
+                <div class="problem-header">
+                    <span class="problem-type" id="problemType">Absolute Value: Simplify</span>
+                    <span class="difficulty-badge easy" id="difficultyBadge">Easy</span>
+                </div>
+
+                <div class="problem-content">
+                    <p class="problem-instruction" id="instruction">Evaluate the following expression:</p>
+                    <div class="problem-expression" id="problemExpression">
+                        <span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">−3</span><span class="abs-bar">|</span></span> = ?
+                    </div>
+
+                    <div class="answer-section">
+                        <div class="input-group">
+                            <input type="text" class="answer-input" id="answerInput" placeholder="?" autocomplete="off">
+                            <button class="submit-btn" id="submitBtn">Check</button>
+                        </div>
+                    </div>
+
+                    <div class="feedback" id="feedback">
+                        <div class="feedback-header">
+                            <span class="feedback-icon" id="feedbackIcon">✓</span>
+                            <span class="feedback-title" id="feedbackTitle">Correct!</span>
+                        </div>
+                        <p class="feedback-explanation" id="feedbackExplanation"></p>
+                        <button class="next-btn" id="nextBtn">Next Problem →</button>
+                    </div>
+                </div>
+
+                <div class="theory-panel">
+                    <div class="theory-toggle" id="theoryToggle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        <span>Show Theory & Tips</span>
+                    </div>
+                    <div class="theory-content" id="theoryContent">
+                        <h4>Absolute Value Definition</h4>
+                        <p>The absolute value of a number is its distance from zero on the number line. It's always non-negative.</p>
+                        <div class="formula">
+                            |a| = a, if a ≥ 0<br>
+                            |a| = -a, if a < 0
+                        </div>
+                        <p><strong>Key insight:</strong> When a is negative, -a becomes positive (negative of a negative).</p>
+                        <h4>Example</h4>
+                        <p>If a = -6, then |a| = |-6| = -(-6) = 6</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            currentTopic: 'abs-simplify',
+            currentProblem: null,
+            stats: {
+                total: 0,
+                correct: 0,
+                incorrect: 0,
+                streak: 0
+            }
+        };
+
+        // Problem Generators
+        const problemGenerators = {
+            'abs-simplify': generateAbsSimplify,
+            'abs-equations': generateAbsEquations,
+            'abs-inequalities': generateAbsInequalities
+        };
+
+        // Theory content for each topic
+        const theoryContent = {
+            'abs-simplify': `
+                <h4>Absolute Value Definition</h4>
+                <p>The absolute value of a number is its distance from zero on the number line. It's always non-negative.</p>
+                <div class="formula">
+                    |a| = a, if a ≥ 0<br>
+                    |a| = -a, if a < 0
+                </div>
+                <p><strong>Key insight:</strong> When a is negative, -a becomes positive (negative of a negative).</p>
+                <h4>Example</h4>
+                <p>If a = -6, then |a| = |-6| = -(-6) = 6</p>
+            `,
+            'abs-equations': `
+                <h4>Solving Absolute Value Equations</h4>
+                <p>For equations like |expression| = k where k ≥ 0:</p>
+                <div class="formula">
+                    |x| = k means x = k OR x = -k
+                </div>
+                <p><strong>Steps:</strong></p>
+                <p>1. Isolate the absolute value on one side</p>
+                <p>2. If |expression| = k, set up TWO equations: expression = k AND expression = -k</p>
+                <p>3. Solve each equation separately</p>
+                <p>4. Check your answers in the original equation</p>
+                <h4>Special Cases</h4>
+                <p>• |expression| = negative → No solution (absolute value can't be negative)</p>
+                <p>• |expression| = 0 → expression = 0 (only one solution)</p>
+            `,
+            'abs-inequalities': `
+                <h4>Solving Absolute Value Inequalities</h4>
+                <p>There are two main types:</p>
+                <div class="formula">
+                    |x| < k means -k < x < k (AND compound inequality)<br>
+                    |x| > k means x < -k OR x > k (OR compound inequality)
+                </div>
+                <p><strong>Memory trick:</strong></p>
+                <p>• "Less than" → "AND" (between values)</p>
+                <p>• "Greater than" → "OR" (outside values)</p>
+                <h4>Example</h4>
+                <p>|x - 3| < 5 means -5 < x - 3 < 5, so -2 < x < 8</p>
+                <p>|x + 2| > 4 means x + 2 < -4 OR x + 2 > 4, so x < -6 OR x > 2</p>
+            `
+        };
+
+        // Generate Absolute Value Simplification Problems
+        function generateAbsSimplify() {
+            const types = ['single', 'expression', 'nested', 'withVariable'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let problem, answer, explanation, difficulty;
+
+            switch(type) {
+                case 'single':
+                    const num = Math.floor(Math.random() * 41) - 20; // -20 to 20
+                    const numDisplay = num < 0 ? `−${Math.abs(num)}` : num.toString();
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">${numDisplay}</span><span class="abs-bar">|</span></span> = ?`;
+                    answer = Math.abs(num);
+                    difficulty = 'easy';
+                    if (num >= 0) {
+                        explanation = `Since ${num} ≥ 0, |${num}| = ${num}`;
+                    } else {
+                        explanation = `Since ${num} < 0, |${num}| = −(${num}) = ${answer}`;
+                    }
+                    break;
+
+                case 'expression':
+                    const nums = [];
+                    const ops = ['+', '-'];
+                    let sum = 0;
+                    const count = Math.floor(Math.random() * 3) + 2; // 2-4 numbers
+                    
+                    for (let i = 0; i < count; i++) {
+                        const n = Math.floor(Math.random() * 31) - 15;
+                        nums.push(n);
+                        sum += n;
+                    }
+                    
+                    let expr = nums[0] < 0 ? `−${Math.abs(nums[0])}` : nums[0].toString();
+                    for (let i = 1; i < nums.length; i++) {
+                        if (nums[i] >= 0) {
+                            expr += ` + ${nums[i]}`;
+                        } else {
+                            expr += ` − ${Math.abs(nums[i])}`;
+                        }
+                    }
+                    
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">${expr}</span><span class="abs-bar">|</span></span> = ?`;
+                    answer = Math.abs(sum);
+                    difficulty = 'medium';
+                    explanation = `First, simplify inside: ${expr} = ${sum}.<br>Then |${sum}| = ${answer}`;
+                    break;
+
+                case 'nested':
+                    const a = Math.floor(Math.random() * 21) - 10;
+                    const b = Math.floor(Math.random() * 21) - 10;
+                    const innerResult = Math.abs(a) - b;
+                    const aDisplay = a < 0 ? `−${Math.abs(a)}` : a.toString();
+                    const bDisplay = b >= 0 ? `− ${b}` : `+ ${Math.abs(b)}`;
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner"><span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">${aDisplay}</span><span class="abs-bar">|</span></span> ${bDisplay}</span><span class="abs-bar">|</span></span> = ?`;
+                    answer = Math.abs(innerResult);
+                    difficulty = 'hard';
+                    explanation = `First, |${a}| = ${Math.abs(a)}.<br>Then ${Math.abs(a)} − ${b} = ${innerResult}.<br>Finally, |${innerResult}| = ${answer}`;
+                    break;
+
+                case 'withVariable':
+                    const val = Math.floor(Math.random() * 21) - 10;
+                    const coef = Math.floor(Math.random() * 5) + 1;
+                    const result = coef * val;
+                    const coefDisplay = coef === 1 ? '' : coef;
+                    problem = `If x = ${val}, evaluate <span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">${coefDisplay}x</span><span class="abs-bar">|</span></span> = ?`;
+                    answer = Math.abs(result);
+                    difficulty = 'medium';
+                    explanation = `Substitute x = ${val}: |${coef} × ${val}| = |${result}| = ${answer}`;
+                    break;
+            }
+
+            return {
+                type: 'abs-simplify',
+                typeName: 'Absolute Value: Simplify',
+                instruction: 'Evaluate the following expression:',
+                problem,
+                answer: answer.toString(),
+                explanation,
+                difficulty
+            };
+        }
+
+        // Generate Absolute Value Equation Problems
+        function generateAbsEquations() {
+            const types = ['basic', 'linear', 'twoSolutions'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let problem, answer, explanation, difficulty, instruction;
+
+            switch(type) {
+                case 'basic':
+                    const k = Math.floor(Math.random() * 15) + 1;
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">x</span><span class="abs-bar">|</span></span> = ${k}`;
+                    answer = `${k}, -${k}`;
+                    instruction = 'Find all values of x (separate multiple answers with comma):';
+                    difficulty = 'easy';
+                    explanation = `|x| = ${k} means x = ${k} OR x = −${k}`;
+                    break;
+
+                case 'linear':
+                    const a = Math.floor(Math.random() * 5) + 1;
+                    const b = Math.floor(Math.random() * 11) - 5;
+                    const c = Math.floor(Math.random() * 15) + 1;
+                    // |ax + b| = c
+                    // Solutions: x = (c - b)/a and x = (-c - b)/a
+                    const sol1 = (c - b) / a;
+                    const sol2 = (-c - b) / a;
+                    const sols = [sol1, sol2].sort((x, y) => x - y);
+                    
+                    const bStr = b >= 0 ? `+ ${b}` : `− ${Math.abs(b)}`;
+                    const aStr = a === 1 ? '' : a;
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">${aStr}x ${bStr}</span><span class="abs-bar">|</span></span> = ${c}`;
+                    
+                    // Format answers
+                    const formatNum = n => Number.isInteger(n) ? n.toString() : n.toFixed(2);
+                    answer = `${formatNum(sols[0])}, ${formatNum(sols[1])}`;
+                    instruction = 'Find all values of x (separate with comma, round to 2 decimals if needed):';
+                    difficulty = 'medium';
+                    explanation = `Set up two equations:<br>
+                        ${aStr}x ${bStr} = ${c} → x = ${formatNum(sol1)}<br>
+                        ${aStr}x ${bStr} = −${c} → x = ${formatNum(sol2)}`;
+                    break;
+
+                case 'twoSolutions':
+                    // Create nice integer solutions
+                    const x1 = Math.floor(Math.random() * 11) - 5;
+                    const x2 = Math.floor(Math.random() * 11) - 5;
+                    if (x1 === x2) return generateAbsEquations(); // retry
+                    
+                    // |x - m| = d where m is midpoint and d is half-distance
+                    const m = (x1 + x2) / 2;
+                    const d = Math.abs(x1 - x2) / 2;
+                    
+                    if (!Number.isInteger(m) || !Number.isInteger(d)) return generateAbsEquations();
+                    
+                    const mStr = m >= 0 ? `− ${m}` : `+ ${Math.abs(m)}`;
+                    problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">x ${mStr}</span><span class="abs-bar">|</span></span> = ${d}`;
+                    const sortedSols = [x1, x2].sort((a, b) => a - b);
+                    answer = `${sortedSols[0]}, ${sortedSols[1]}`;
+                    instruction = 'Find all values of x (separate with comma):';
+                    difficulty = 'medium';
+                    explanation = `x ${mStr} = ${d} → x = ${m + d}<br>x ${mStr} = −${d} → x = ${m - d}`;
+                    break;
+            }
+
+            return {
+                type: 'abs-equations',
+                typeName: 'Absolute Value: Equations',
+                instruction,
+                problem,
+                answer,
+                explanation,
+                difficulty
+            };
+        }
+
+        // Generate Absolute Value Inequality Problems
+        function generateAbsInequalities() {
+            const types = ['lessThan', 'greaterThan'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let problem, answer, explanation, difficulty, instruction;
+            
+            const k = Math.floor(Math.random() * 8) + 2;
+            const b = Math.floor(Math.random() * 11) - 5;
+            const bStr = b >= 0 ? `+ ${b}` : `− ${Math.abs(b)}`;
+
+            instruction = 'Write the solution in interval notation (use "inf" for infinity):';
+
+            if (type === 'lessThan') {
+                // |x + b| < k means -k < x + b < k, so -k - b < x < k - b
+                const left = -k - b;
+                const right = k - b;
+                problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">x ${bStr}</span><span class="abs-bar">|</span></span> < ${k}`;
+                answer = `(${left}, ${right})`;
+                difficulty = 'medium';
+                explanation = `|x ${bStr}| < ${k} means −${k} < x ${bStr} < ${k}<br>
+                    Solve: −${k} − ${b > 0 ? b : `(${b})`} < x < ${k} − ${b > 0 ? b : `(${b})`}<br>
+                    Result: ${left} < x < ${right}, or (${left}, ${right})`;
+            } else {
+                // |x + b| > k means x + b < -k OR x + b > k
+                const left = -k - b;
+                const right = k - b;
+                problem = `<span class="abs-group"><span class="abs-bar">|</span><span class="abs-inner">x ${bStr}</span><span class="abs-bar">|</span></span> > ${k}`;
+                answer = `(-inf, ${left}) U (${right}, inf)`;
+                difficulty = 'hard';
+                explanation = `|x ${bStr}| > ${k} means x ${bStr} < −${k} OR x ${bStr} > ${k}<br>
+                    Solve: x < ${left} OR x > ${right}<br>
+                    Result: (−∞, ${left}) ∪ (${right}, ∞)`;
+            }
+
+            return {
+                type: 'abs-inequalities',
+                typeName: 'Absolute Value: Inequalities',
+                instruction,
+                problem,
+                answer,
+                explanation,
+                difficulty
+            };
+        }
+
+        // UI Updates
+        function updateStats() {
+            document.getElementById('totalProblems').textContent = state.stats.total;
+            document.getElementById('correctCount').textContent = state.stats.correct;
+            document.getElementById('incorrectCount').textContent = state.stats.incorrect;
+            document.getElementById('streakCount').textContent = state.stats.streak;
+        }
+
+        function showProblem(problemData) {
+            state.currentProblem = problemData;
+            
+            document.getElementById('problemType').textContent = problemData.typeName;
+            document.getElementById('instruction').textContent = problemData.instruction;
+            document.getElementById('problemExpression').innerHTML = problemData.problem;
+            
+            const badge = document.getElementById('difficultyBadge');
+            badge.textContent = problemData.difficulty.charAt(0).toUpperCase() + problemData.difficulty.slice(1);
+            badge.className = `difficulty-badge ${problemData.difficulty}`;
+            
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').className = 'answer-input';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('answerInput').focus();
+            
+            // Update theory
+            if (theoryContent[problemData.type]) {
+                document.getElementById('theoryContent').innerHTML = theoryContent[problemData.type];
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase().replace(/\s/g, '');
+            const correctAnswer = state.currentProblem.answer.toLowerCase().replace(/\s/g, '');
+            
+            // Parse answers for comparison (handle multiple solutions)
+            const parseAnswers = (ans) => {
+                return ans.split(',').map(a => a.trim()).sort().join(',');
+            };
+            
+            const isCorrect = parseAnswers(userAnswer) === parseAnswers(correctAnswer);
+            
+            const input = document.getElementById('answerInput');
+            const feedback = document.getElementById('feedback');
+            
+            state.stats.total++;
+            
+            if (isCorrect) {
+                state.stats.correct++;
+                state.stats.streak++;
+                input.className = 'answer-input correct';
+                feedback.className = 'feedback correct show';
+                document.getElementById('feedbackIcon').textContent = '✓';
+                document.getElementById('feedbackTitle').textContent = 'Correct!';
+            } else {
+                state.stats.incorrect++;
+                state.stats.streak = 0;
+                input.className = 'answer-input incorrect';
+                feedback.className = 'feedback incorrect show';
+                document.getElementById('feedbackIcon').textContent = '✗';
+                document.getElementById('feedbackTitle').textContent = `Incorrect. Answer: ${state.currentProblem.answer}`;
+            }
+            
+            document.getElementById('feedbackExplanation').innerHTML = state.currentProblem.explanation;
+            updateStats();
+        }
+
+        function nextProblem() {
+            const generator = problemGenerators[state.currentTopic];
+            if (generator) {
+                showProblem(generator());
+            }
+        }
+
+        function setTopic(topic) {
+            if (!problemGenerators[topic]) return;
+            
+            state.currentTopic = topic;
+            
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.topic === topic) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            nextProblem();
+        }
+
+        // Event Listeners
+        document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+        document.getElementById('nextBtn').addEventListener('click', nextProblem);
+
+        document.getElementById('answerInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('feedback').classList.contains('show')) {
+                    nextProblem();
+                } else {
+                    checkAnswer();
+                }
+            }
+        });
+
+        document.querySelectorAll('.topic-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!btn.classList.contains('locked')) {
+                    setTopic(btn.dataset.topic);
+                }
+            });
+        });
+
+        document.getElementById('theoryToggle').addEventListener('click', () => {
+            const toggle = document.getElementById('theoryToggle');
+            const content = document.getElementById('theoryContent');
+            toggle.classList.toggle('open');
+            content.classList.toggle('show');
+        });
+
+        // Initialize
+        nextProblem();
+    </script>
+</body>
+</html>
