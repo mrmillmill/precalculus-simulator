@@ -1114,6 +1114,7 @@
                                         <button class="math-key" data-char="/">÷</button>
                                         <button class="math-key" data-char="(">(</button>
                                         <button class="math-key" data-char=")">)</button>
+                                        <button class="math-key" data-char="," title="Separate multiple answers">,</button>
                                     </div>
                                 </div>
                                 <div class="keyboard-section">
@@ -2451,18 +2452,54 @@
             
             // Parse answers for comparison (handle multiple solutions)
             const parseAnswers = (ans) => {
-                return ans.split(',').map(a => a.trim()).sort().join(',');
+                return ans.split(',').map(a => a.trim()).filter(a => a.length > 0).sort().join(',');
             };
             
+            const userParsed = parseAnswers(userAnswer);
+            const correctParsed = parseAnswers(correctAnswer);
+            
+            // Count expected answers
+            const expectedAnswerCount = correctParsed.split(',').length;
+            const userAnswerCount = userParsed.split(',').filter(a => a.length > 0).length;
+            
+            console.log('Expected answer count:', expectedAnswerCount, 'User answer count:', userAnswerCount);
+            
             // Check if answers match - try multiple methods
-            let isCorrect = parseAnswers(userAnswer) === parseAnswers(correctAnswer);
+            let isCorrect = userParsed === correctParsed;
             console.log('Direct match:', isCorrect);
             
-            // If not exact match, try equivalence check
-            if (!isCorrect) {
-                isCorrect = areEquivalent(userAnswer, correctAnswer);
-                console.log('After areEquivalent:', isCorrect);
-            }
+            // For problems with multiple answers, user must provide all of them
+            // Only use fallback checks for single-answer problems (typically radical problems)
+            const isMultiAnswerProblem = expectedAnswerCount > 1;
+            
+            if (isMultiAnswerProblem) {
+                // For multiple answer problems, require exact count and matching values
+                if (userAnswerCount !== expectedAnswerCount) {
+                    console.log('Multi-answer problem: user provided', userAnswerCount, 'answers, expected', expectedAnswerCount);
+                    isCorrect = false;
+                } else {
+                    // Compare each answer (allowing for some numeric tolerance)
+                    const userNums = userParsed.split(',').map(s => parseFloat(s.replace(/[^0-9.-]/g, ''))).sort((a,b) => a-b);
+                    const correctNums = correctParsed.split(',').map(s => parseFloat(s.replace(/[^0-9.-]/g, ''))).sort((a,b) => a-b);
+                    
+                    console.log('User numbers:', userNums, 'Correct numbers:', correctNums);
+                    
+                    if (userNums.length === correctNums.length) {
+                        isCorrect = userNums.every((num, i) => {
+                            const diff = Math.abs(num - correctNums[i]);
+                            return diff < 0.01 || (correctNums[i] !== 0 && diff / Math.abs(correctNums[i]) < 0.01);
+                        });
+                    }
+                }
+                console.log('After multi-answer check:', isCorrect);
+            } else {
+                // Single answer problem - use all the fallback checks for radicals etc.
+                
+                // If not exact match, try equivalence check
+                if (!isCorrect) {
+                    isCorrect = areEquivalent(userAnswer, correctAnswer);
+                    console.log('After areEquivalent:', isCorrect);
+                }
             
             // Additional check: strip all non-essential characters and compare
             if (!isCorrect) {
@@ -2666,6 +2703,7 @@
                     isCorrect = true;
                 }
             }
+            } // End of single-answer problem fallback checks
             
             const editor = document.getElementById('mathEditor');
             const feedback = document.getElementById('feedback');
