@@ -1256,11 +1256,19 @@
                 </div>
                 <h4>Radical Properties</h4>
                 <div class="formula">
-                    √(ab) = √a · √b<br>
-                    √(a/b) = √a / √b<br>
-                    ⁿ√(aᵐ) = a<sup>m/n</sup>
+                    <strong>Product Rule:</strong> √(ab) = √a · √b<br>
+                    <strong>Quotient Rule:</strong> √(a/b) = √a / √b<br>
+                    <strong>Power Rule:</strong> ⁿ√(aᵐ) = a<sup>m/n</sup>
                 </div>
-                <p><strong>Key insight:</strong> The index becomes the denominator, the power becomes the numerator.</p>
+                <h4>Simplifying Numerical Radicals</h4>
+                <p>Factor out perfect powers: √72 = √(36·2) = 6√2</p>
+                <p>For cube roots: ³√54 = ³√(27·2) = 3·³√2</p>
+                <h4>Multi-Variable Radicals</h4>
+                <p>Simplify each part: √(16x⁴y²) = 4x²y</p>
+                <p>Extract full powers: ³√(8x⁶y³) = 2x²y</p>
+                <h4>Radical Fractions</h4>
+                <p>Simplify inside first, then take roots:</p>
+                <p>³√(x²y⁶/x⁸) = ³√(y⁶/x⁶) = y²/x²</p>
             `
         };
 
@@ -1582,7 +1590,11 @@
 
         // Generate Radicals Problems
         function generateRadicals() {
-            const types = ['toRational', 'fromRational', 'simplifyRadical', 'productRule', 'quotientRule'];
+            const types = [
+                'toRational', 'fromRational', 'simplifyRadical', 'productRule', 'quotientRule',
+                'numericalSimplify', 'numericalMultiply', 'numericalDivide', 'mixedRadicalMultiply',
+                'multiVariableSimplify', 'radicalFractionSimplify'
+            ];
             const type = types[Math.floor(Math.random() * types.length)];
             
             let problem, answer, explanation, difficulty, instruction;
@@ -1698,6 +1710,246 @@
                         explanation = `Quotient rule: ${indexSymbol}${base} / ${indexSymbol}${base2} = ${indexSymbol}(${base}/${base2})`;
                     }
                     difficulty = 'easy';
+                    break;
+                }
+                
+                // ============ NEW ADVANCED PROBLEM TYPES ============
+                
+                case 'numericalSimplify': {
+                    // √72 = 6√2, ³√54 = 3³√2, etc.
+                    instruction = 'Simplify the radical completely:';
+                    
+                    // Perfect squares/cubes with remainders
+                    const sqrtProblems = [
+                        { n: 72, coef: 6, remain: 2 },   // √72 = √(36·2) = 6√2
+                        { n: 50, coef: 5, remain: 2 },   // √50 = √(25·2) = 5√2
+                        { n: 48, coef: 4, remain: 3 },   // √48 = √(16·3) = 4√3
+                        { n: 75, coef: 5, remain: 3 },   // √75 = √(25·3) = 5√3
+                        { n: 98, coef: 7, remain: 2 },   // √98 = √(49·2) = 7√2
+                        { n: 128, coef: 8, remain: 2 },  // √128 = √(64·2) = 8√2
+                        { n: 45, coef: 3, remain: 5 },   // √45 = √(9·5) = 3√5
+                        { n: 200, coef: 10, remain: 2 }, // √200 = √(100·2) = 10√2
+                        { n: 18, coef: 3, remain: 2 },   // √18 = √(9·2) = 3√2
+                        { n: 32, coef: 4, remain: 2 },   // √32 = √(16·2) = 4√2
+                    ];
+                    
+                    const cbrtProblems = [
+                        { n: 54, coef: 3, remain: 2 },   // ³√54 = ³√(27·2) = 3³√2
+                        { n: 16, coef: 2, remain: 2 },   // ³√16 = ³√(8·2) = 2³√2
+                        { n: 24, coef: 2, remain: 3 },   // ³√24 = ³√(8·3) = 2³√3
+                        { n: 128, coef: 4, remain: 2 },  // ³√128 = ³√(64·2) = 4³√2
+                        { n: 250, coef: 5, remain: 2 },  // ³√250 = ³√(125·2) = 5³√2
+                    ];
+                    
+                    const useCube = Math.random() < 0.3;
+                    const problems = useCube ? cbrtProblems : sqrtProblems;
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    const indexSymbol = useCube ? '³√' : '√';
+                    
+                    problem = `${indexSymbol}${p.n} = ?`;
+                    answer = `${p.coef}${indexSymbol}${p.remain}`;
+                    
+                    const perfectPower = Math.pow(p.coef, useCube ? 3 : 2);
+                    explanation = `${indexSymbol}${p.n} = ${indexSymbol}(${perfectPower} · ${p.remain}) = ${indexSymbol}${perfectPower} · ${indexSymbol}${p.remain} = ${p.coef}${indexSymbol}${p.remain}`;
+                    difficulty = 'medium';
+                    break;
+                }
+                
+                case 'numericalMultiply': {
+                    // √50 · √2 = √100 = 10
+                    instruction = 'Multiply and simplify:';
+                    
+                    const problems = [
+                        { a: 50, b: 2, result: 10 },    // √50 · √2 = √100 = 10
+                        { a: 8, b: 2, result: 4 },      // √8 · √2 = √16 = 4
+                        { a: 12, b: 3, result: 6 },     // √12 · √3 = √36 = 6
+                        { a: 18, b: 2, result: 6 },     // √18 · √2 = √36 = 6
+                        { a: 5, b: 20, result: 10 },    // √5 · √20 = √100 = 10
+                        { a: 6, b: 6, result: 6 },      // √6 · √6 = √36 = 6
+                        { a: 3, b: 27, result: 9 },     // √3 · √27 = √81 = 9
+                        { a: 7, b: 7, result: 7 },      // √7 · √7 = √49 = 7
+                        { a: 2, b: 32, result: 8 },     // √2 · √32 = √64 = 8
+                        { a: 45, b: 5, result: 15 },    // √45 · √5 = √225 = 15
+                    ];
+                    
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    const product = p.a * p.b;
+                    
+                    problem = `√${p.a} · √${p.b} = ?`;
+                    answer = `${p.result}`;
+                    explanation = `√${p.a} · √${p.b} = √(${p.a} · ${p.b}) = √${product} = ${p.result}`;
+                    difficulty = 'medium';
+                    break;
+                }
+                
+                case 'numericalDivide': {
+                    // √512 / √2 = √256 = 16
+                    instruction = 'Divide and simplify:';
+                    
+                    const problems = [
+                        { a: 512, b: 2, result: 16 },   // √512 / √2 = √256 = 16
+                        { a: 72, b: 2, result: 6 },     // √72 / √2 = √36 = 6
+                        { a: 200, b: 2, result: 10 },   // √200 / √2 = √100 = 10
+                        { a: 98, b: 2, result: 7 },     // √98 / √2 = √49 = 7
+                        { a: 75, b: 3, result: 5 },     // √75 / √3 = √25 = 5
+                        { a: 147, b: 3, result: 7 },    // √147 / √3 = √49 = 7
+                        { a: 245, b: 5, result: 7 },    // √245 / √5 = √49 = 7
+                        { a: 180, b: 5, result: 6 },    // √180 / √5 = √36 = 6
+                        { a: 288, b: 2, result: 12 },   // √288 / √2 = √144 = 12
+                        { a: 162, b: 2, result: 9 },    // √162 / √2 = √81 = 9
+                    ];
+                    
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    const quotient = p.a / p.b;
+                    
+                    problem = `√${p.a} / √${p.b} = ?`;
+                    answer = `${p.result}`;
+                    explanation = `√${p.a} / √${p.b} = √(${p.a}/${p.b}) = √${quotient} = ${p.result}`;
+                    difficulty = 'medium';
+                    break;
+                }
+                
+                case 'mixedRadicalMultiply': {
+                    // ³√8 · ⁴√81 = 2 · 3 = 6
+                    instruction = 'Simplify each radical and multiply:';
+                    
+                    const problems = [
+                        { idx1: 3, n1: 8, val1: 2, idx2: 4, n2: 81, val2: 3, result: 6 },    // ³√8 · ⁴√81 = 2·3 = 6
+                        { idx1: 2, n1: 16, val1: 4, idx2: 3, n2: 27, val2: 3, result: 12 },  // √16 · ³√27 = 4·3 = 12
+                        { idx1: 2, n1: 25, val1: 5, idx2: 3, n2: 8, val2: 2, result: 10 },   // √25 · ³√8 = 5·2 = 10
+                        { idx1: 3, n1: 27, val1: 3, idx2: 4, n2: 16, val2: 2, result: 6 },   // ³√27 · ⁴√16 = 3·2 = 6
+                        { idx1: 2, n1: 49, val1: 7, idx2: 3, n2: 8, val2: 2, result: 14 },   // √49 · ³√8 = 7·2 = 14
+                        { idx1: 4, n1: 16, val1: 2, idx2: 2, n2: 81, val2: 9, result: 18 },  // ⁴√16 · √81 = 2·9 = 18
+                        { idx1: 3, n1: 64, val1: 4, idx2: 2, n2: 25, val2: 5, result: 20 },  // ³√64 · √25 = 4·5 = 20
+                        { idx1: 2, n1: 36, val1: 6, idx2: 3, n2: 125, val2: 5, result: 30 }, // √36 · ³√125 = 6·5 = 30
+                    ];
+                    
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    const sym1 = p.idx1 === 2 ? '√' : (p.idx1 === 3 ? '³√' : '⁴√');
+                    const sym2 = p.idx2 === 2 ? '√' : (p.idx2 === 3 ? '³√' : '⁴√');
+                    
+                    problem = `${sym1}${p.n1} · ${sym2}${p.n2} = ?`;
+                    answer = `${p.result}`;
+                    explanation = `${sym1}${p.n1} = ${p.val1} and ${sym2}${p.n2} = ${p.val2}<br>${p.val1} · ${p.val2} = ${p.result}`;
+                    difficulty = 'medium';
+                    break;
+                }
+                
+                case 'multiVariableSimplify': {
+                    // ³√(16x⁵y⁴z) = 2xy³√(2x²yz)
+                    instruction = 'Simplify the radical completely:';
+                    
+                    const problems = [
+                        {
+                            index: 3,
+                            display: '³√(8x<sup>6</sup>y<sup>3</sup>)',
+                            answer: '2x^2*y',
+                            explanation: '³√(8x<sup>6</sup>y<sup>3</sup>) = ³√8 · ³√x<sup>6</sup> · ³√y<sup>3</sup> = 2 · x<sup>2</sup> · y = 2x²y'
+                        },
+                        {
+                            index: 2,
+                            display: '√(16x<sup>4</sup>y<sup>2</sup>)',
+                            answer: '4x^2*y',
+                            explanation: '√(16x<sup>4</sup>y<sup>2</sup>) = √16 · √x<sup>4</sup> · √y<sup>2</sup> = 4 · x<sup>2</sup> · y = 4x²y'
+                        },
+                        {
+                            index: 2,
+                            display: '√(25a<sup>2</sup>b<sup>4</sup>)',
+                            answer: '5a*b^2',
+                            explanation: '√(25a<sup>2</sup>b<sup>4</sup>) = √25 · √a<sup>2</sup> · √b<sup>4</sup> = 5 · a · b<sup>2</sup> = 5ab²'
+                        },
+                        {
+                            index: 3,
+                            display: '³√(27a<sup>3</sup>b<sup>6</sup>)',
+                            answer: '3a*b^2',
+                            explanation: '³√(27a<sup>3</sup>b<sup>6</sup>) = ³√27 · ³√a<sup>3</sup> · ³√b<sup>6</sup> = 3 · a · b<sup>2</sup> = 3ab²'
+                        },
+                        {
+                            index: 2,
+                            display: '√(36x<sup>6</sup>y<sup>4</sup>)',
+                            answer: '6x^3*y^2',
+                            explanation: '√(36x<sup>6</sup>y<sup>4</sup>) = √36 · √x<sup>6</sup> · √y<sup>4</sup> = 6 · x<sup>3</sup> · y<sup>2</sup> = 6x³y²'
+                        },
+                        {
+                            index: 4,
+                            display: '⁴√(16x<sup>8</sup>y<sup>4</sup>)',
+                            answer: '2x^2*y',
+                            explanation: '⁴√(16x<sup>8</sup>y<sup>4</sup>) = ⁴√16 · ⁴√x<sup>8</sup> · ⁴√y<sup>4</sup> = 2 · x<sup>2</sup> · y = 2x²y'
+                        },
+                        {
+                            index: 3,
+                            display: '³√(64x<sup>9</sup>y<sup>6</sup>)',
+                            answer: '4x^3*y^2',
+                            explanation: '³√(64x<sup>9</sup>y<sup>6</sup>) = ³√64 · ³√x<sup>9</sup> · ³√y<sup>6</sup> = 4 · x<sup>3</sup> · y<sup>2</sup> = 4x³y²'
+                        },
+                        {
+                            index: 2,
+                            display: '√(100a<sup>4</sup>b<sup>2</sup>c<sup>6</sup>)',
+                            answer: '10a^2*b*c^3',
+                            explanation: '√(100a<sup>4</sup>b<sup>2</sup>c<sup>6</sup>) = 10 · a<sup>2</sup> · b · c<sup>3</sup> = 10a²bc³'
+                        },
+                    ];
+                    
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    problem = p.display + ' = ?';
+                    answer = p.answer;
+                    explanation = p.explanation;
+                    difficulty = 'hard';
+                    break;
+                }
+                
+                case 'radicalFractionSimplify': {
+                    // ³√(x²y⁶/x⁸) = y²/x²
+                    instruction = 'Simplify the radical fraction:';
+                    
+                    const problems = [
+                        {
+                            display: '³√(x<sup>2</sup>y<sup>6</sup> / x<sup>8</sup>)',
+                            answer: 'y^2/x^2',
+                            explanation: '³√(x<sup>2</sup>y<sup>6</sup>/x<sup>8</sup>) = ³√(y<sup>6</sup>/x<sup>6</sup>) = ³√y<sup>6</sup> / ³√x<sup>6</sup> = y<sup>2</sup>/x<sup>2</sup>'
+                        },
+                        {
+                            display: '√(a<sup>4</sup>b<sup>2</sup> / a<sup>2</sup>)',
+                            answer: 'a*b',
+                            explanation: '√(a<sup>4</sup>b<sup>2</sup>/a<sup>2</sup>) = √(a<sup>2</sup>b<sup>2</sup>) = ab'
+                        },
+                        {
+                            display: '√(x<sup>6</sup> / y<sup>4</sup>)',
+                            answer: 'x^3/y^2',
+                            explanation: '√(x<sup>6</sup>/y<sup>4</sup>) = √x<sup>6</sup> / √y<sup>4</sup> = x<sup>3</sup>/y<sup>2</sup>'
+                        },
+                        {
+                            display: '³√(a<sup>9</sup> / b<sup>6</sup>)',
+                            answer: 'a^3/b^2',
+                            explanation: '³√(a<sup>9</sup>/b<sup>6</sup>) = ³√a<sup>9</sup> / ³√b<sup>6</sup> = a<sup>3</sup>/b<sup>2</sup>'
+                        },
+                        {
+                            display: '√(49x<sup>4</sup> / y<sup>6</sup>)',
+                            answer: '7x^2/y^3',
+                            explanation: '√(49x<sup>4</sup>/y<sup>6</sup>) = √49 · √x<sup>4</sup> / √y<sup>6</sup> = 7x<sup>2</sup>/y<sup>3</sup>'
+                        },
+                        {
+                            display: '⁴√(x<sup>8</sup>y<sup>4</sup> / z<sup>12</sup>)',
+                            answer: 'x^2*y/z^3',
+                            explanation: '⁴√(x<sup>8</sup>y<sup>4</sup>/z<sup>12</sup>) = x<sup>2</sup>y/z<sup>3</sup>'
+                        },
+                        {
+                            display: '√(81a<sup>2</sup> / b<sup>4</sup>)',
+                            answer: '9a/b^2',
+                            explanation: '√(81a<sup>2</sup>/b<sup>4</sup>) = √81 · √a<sup>2</sup> / √b<sup>4</sup> = 9a/b<sup>2</sup>'
+                        },
+                        {
+                            display: '³√(8x<sup>6</sup> / y<sup>9</sup>)',
+                            answer: '2x^2/y^3',
+                            explanation: '³√(8x<sup>6</sup>/y<sup>9</sup>) = ³√8 · ³√x<sup>6</sup> / ³√y<sup>9</sup> = 2x<sup>2</sup>/y<sup>3</sup>'
+                        },
+                    ];
+                    
+                    const p = problems[Math.floor(Math.random() * problems.length)];
+                    problem = p.display + ' = ?';
+                    answer = p.answer;
+                    explanation = p.explanation;
+                    difficulty = 'hard';
                     break;
                 }
             }
@@ -2357,6 +2609,11 @@
             normalized = normalized.replace(/fourthroot/g, '4thrt');
             normalized = normalized.replace(/4thrt\^1(?!\d)/g, '4thrt'); // Remove ^1 after 4thrt
             
+            // Normalize coefficient*sqrt format: 6*sqrt2 -> 6sqrt2, 6 * sqrt(2) -> 6sqrt2
+            normalized = normalized.replace(/(\d+)\*sqrt/g, '$1sqrt');
+            normalized = normalized.replace(/(\d+)\*cbrt/g, '$1cbrt');
+            normalized = normalized.replace(/(\d+)\*4thrt/g, '$14thrt');
+            
             // Normalize power notation: ^(2) -> ^2 for single digits
             normalized = normalized.replace(/\^\((\d)\)/g, '^$1');
             
@@ -2522,6 +2779,27 @@
                     if (userRoot === correctRoot) {
                         isCorrect = true;
                     }
+                }
+            }
+            
+            // Check for algebraic expression equivalence (multi-variable, fractions)
+            if (!isCorrect) {
+                const normalizeAlgebraic = (s) => {
+                    return s
+                        .replace(/\s/g, '')
+                        .replace(/\*/g, '')        // Remove all multiplication signs
+                        .replace(/\(([^()]+)\)/g, '$1')  // Remove parentheses
+                        .replace(/\^1(?!\d)/g, '')  // Remove ^1
+                        .toLowerCase();
+                };
+                
+                const userAlg = normalizeAlgebraic(userAnswer);
+                const correctAlg = normalizeAlgebraic(correctAnswer);
+                
+                console.log('Algebraic check - user:', userAlg, 'correct:', correctAlg);
+                
+                if (userAlg === correctAlg) {
+                    isCorrect = true;
                 }
             }
             
