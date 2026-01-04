@@ -2652,6 +2652,12 @@
             // Direct match
             if (userAns === correctAns) return true;
             
+            // If both are simple numbers, they must match exactly
+            const isSimpleNumber = (s) => /^-?\d+(\.\d+)?$/.test(s.trim());
+            if (isSimpleNumber(userAns) && isSimpleNumber(correctAns)) {
+                return parseFloat(userAns) === parseFloat(correctAns);
+            }
+            
             // Try removing all parentheses for simple expressions
             const stripParens = (s) => s.replace(/[()]/g, '');
             if (stripParens(userAns) === stripParens(correctAns)) return true;
@@ -2669,6 +2675,12 @@
             
             if (normalizeExponent(userAns) === normalizeExponent(correctAns)) return true;
             if (normalizeExponent(stripParens(userAns)) === normalizeExponent(stripParens(correctAns))) return true;
+            
+            // Only do component extraction if there are variables or radicals involved
+            const hasVarsOrRadicals = (s) => /[a-z]|sqrt|cbrt|4thrt|√/.test(s);
+            if (!hasVarsOrRadicals(userAns) && !hasVarsOrRadicals(correctAns)) {
+                return false; // Simple expressions without variables - must match exactly
+            }
             
             // Extract the key components: root type, variable, and power
             const extractComponents = (s) => {
@@ -2752,56 +2764,67 @@
             } else {
                 // Single answer problem - use all the fallback checks for radicals etc.
                 
+                // Check if this is a radical problem (contains sqrt, cbrt, root symbols)
+                const isRadicalProblem = (s) => {
+                    return s.includes('sqrt') || s.includes('cbrt') || s.includes('4thrt') || 
+                           s.includes('√') || s.includes('root') || s.includes('R');
+                };
+                
+                const problemInvolvesRadicals = isRadicalProblem(correctAnswer) || isRadicalProblem(userAnswer);
+                
                 // If not exact match, try equivalence check
                 if (!isCorrect) {
                     isCorrect = areEquivalent(userAnswer, correctAnswer);
                     console.log('After areEquivalent:', isCorrect);
                 }
             
-            // Additional check: strip all non-essential characters and compare
-            if (!isCorrect) {
-                const simplify = (s) => s.replace(/[()^]/g, '').replace(/sqrt|cbrt|4thrt|4throot/g, 'R');
-                const userSimp = simplify(userAnswer);
-                const correctSimp = simplify(correctAnswer);
-                
-                console.log('Simplify check - user:', userSimp, 'correct:', correctSimp);
-                
-                if (userSimp === correctSimp) {
-                    // Same content, just formatted differently
-                    // Verify it has the right root type
-                    const userRoot = userAnswer.includes('4thrt') || userAnswer.includes('4throot') ? '4' :
-                                    userAnswer.includes('cbrt') ? '3' : 
-                                    userAnswer.includes('sqrt') ? '2' : '0';
-                    const correctRoot = correctAnswer.includes('4thrt') || correctAnswer.includes('4throot') ? '4' :
-                                       correctAnswer.includes('cbrt') ? '3' : 
-                                       correctAnswer.includes('sqrt') ? '2' : '0';
+            // Only apply radical-specific checks if the problem involves radicals
+            if (problemInvolvesRadicals) {
+            
+                // Additional check: strip all non-essential characters and compare
+                if (!isCorrect) {
+                    const simplify = (s) => s.replace(/[()^]/g, '').replace(/sqrt|cbrt|4thrt|4throot/g, 'R');
+                    const userSimp = simplify(userAnswer);
+                    const correctSimp = simplify(correctAnswer);
                     
-                    if (userRoot === correctRoot) {
+                    console.log('Simplify check - user:', userSimp, 'correct:', correctSimp);
+                    
+                    if (userSimp === correctSimp) {
+                        // Same content, just formatted differently
+                        // Verify it has the right root type
+                        const userRoot = userAnswer.includes('4thrt') || userAnswer.includes('4throot') ? '4' :
+                                        userAnswer.includes('cbrt') ? '3' : 
+                                        userAnswer.includes('sqrt') ? '2' : '0';
+                        const correctRoot = correctAnswer.includes('4thrt') || correctAnswer.includes('4throot') ? '4' :
+                                           correctAnswer.includes('cbrt') ? '3' : 
+                                           correctAnswer.includes('sqrt') ? '2' : '0';
+                        
+                        if (userRoot === correctRoot) {
+                            isCorrect = true;
+                        }
+                    }
+                }
+                
+                // Check for algebraic expression equivalence (multi-variable, fractions)
+                if (!isCorrect) {
+                    const normalizeAlgebraic = (s) => {
+                        return s
+                            .replace(/\s/g, '')
+                            .replace(/\*/g, '')        // Remove all multiplication signs
+                            .replace(/\(([^()]+)\)/g, '$1')  // Remove parentheses
+                            .replace(/\^1(?!\d)/g, '')  // Remove ^1
+                            .toLowerCase();
+                    };
+                    
+                    const userAlg = normalizeAlgebraic(userAnswer);
+                    const correctAlg = normalizeAlgebraic(correctAnswer);
+                    
+                    console.log('Algebraic check - user:', userAlg, 'correct:', correctAlg);
+                    
+                    if (userAlg === correctAlg) {
                         isCorrect = true;
                     }
                 }
-            }
-            
-            // Check for algebraic expression equivalence (multi-variable, fractions)
-            if (!isCorrect) {
-                const normalizeAlgebraic = (s) => {
-                    return s
-                        .replace(/\s/g, '')
-                        .replace(/\*/g, '')        // Remove all multiplication signs
-                        .replace(/\(([^()]+)\)/g, '$1')  // Remove parentheses
-                        .replace(/\^1(?!\d)/g, '')  // Remove ^1
-                        .toLowerCase();
-                };
-                
-                const userAlg = normalizeAlgebraic(userAnswer);
-                const correctAlg = normalizeAlgebraic(correctAnswer);
-                
-                console.log('Algebraic check - user:', userAlg, 'correct:', correctAlg);
-                
-                if (userAlg === correctAlg) {
-                    isCorrect = true;
-                }
-            }
             
             // Final fallback: extract variable, power, and root type and compare
             if (!isCorrect) {
@@ -2981,6 +3004,7 @@
                     isCorrect = true;
                 }
             }
+            } // End of problemInvolvesRadicals check
             } // End of single-answer problem fallback checks
             
             const editor = document.getElementById('mathEditor');
