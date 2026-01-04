@@ -321,49 +321,428 @@
             display: inline-block;
             white-space: nowrap;
         }
+        
+        .problem-expression sup {
+            font-size: 0.6em;
+            vertical-align: super;
+            line-height: 0;
+        }
+        
+        .problem-expression .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .problem-expression .fraction-num,
+        .problem-expression .fraction-den {
+            display: block;
+            padding: 0.1em 0.3em;
+        }
+        
+        .problem-expression .fraction-num {
+            border-bottom: 2px solid var(--text-primary);
+        }
 
         /* Answer Input */
         .answer-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
+        }
+
+        .math-input-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .math-editor {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            padding: 1.25rem 1.5rem;
+            min-height: 70px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            cursor: text;
+            transition: all 0.3s ease;
+        }
+
+        .math-editor:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .math-editor.correct {
+            border-color: var(--correct);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .math-editor.incorrect {
+            border-color: var(--incorrect);
+            box-shadow: 0 0 20px rgba(255, 68, 102, 0.3);
+            animation: shake 0.5s ease;
+        }
+
+        /* Math elements */
+        .math-element {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .math-char {
+            padding: 0 1px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .math-char.cursor-after::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: 10%;
+            height: 80%;
+            width: 2px;
+            background: var(--accent-cyan);
+            animation: blink 1s infinite;
+        }
+        
+        /* Operator elements (visible between structures) */
+        .math-operator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            margin: 0 4px;
+            font-size: 1.4rem;
+            color: var(--accent-cyan);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .math-operator:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .math-operator.active {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .math-slot {
+            min-width: 24px;
+            min-height: 28px;
+            border: 2px dashed var(--text-muted);
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .math-slot:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .math-slot.active {
+            border-color: var(--accent-cyan);
+            border-style: solid;
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .math-slot.active::after {
+            content: '';
+            width: 2px;
+            height: 70%;
+            background: var(--accent-cyan);
+            animation: blink 1s infinite;
+        }
+
+        .math-slot.filled {
+            border-style: solid;
+            border-color: var(--border-subtle);
+            background: transparent;
+        }
+
+        .math-slot.filled.active {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Radical structure */
+        .math-radical {
+            display: inline-flex;
+            align-items: flex-end;
+            position: relative;
+        }
+
+        .radical-index {
+            font-size: 0.55em;
+            margin-right: -4px;
+            margin-bottom: 0.9em;
+            min-width: 14px;
+            min-height: 18px;
+        }
+
+        .radical-index.math-slot {
+            min-width: 14px;
+            min-height: 16px;
+            padding: 1px 3px;
+        }
+
+        .radical-symbol {
+            font-size: 1.2em;
+            line-height: 1;
+            margin-right: 2px;
+        }
+
+        .radical-content {
+            border-top: 2px solid var(--text-primary);
+            padding: 2px 6px 0 4px;
+            min-width: 30px;
+            min-height: 28px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Power/exponent structure */
+        .math-power {
+            display: inline-flex;
+            align-items: flex-start;
+        }
+
+        .power-base {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .power-exp {
+            font-size: 0.6em;
+            margin-left: 1px;
+            margin-top: -0.5em;
+            min-width: 14px;
+            min-height: 16px;
+        }
+        
+        /* Fraction inside exponent - angled slash style */
+        .power-exp .math-fraction {
+            flex-direction: row;
+            align-items: center;
+            font-size: 1em;
+            margin: 0;
+            gap: 0;
+            position: relative;
+        }
+        
+        .power-exp .math-fraction .fraction-num {
+            padding: 0 1px;
+            min-width: 10px;
+            min-height: 12px;
+            align-self: flex-end;
+            margin-bottom: 2px;
+        }
+        
+        .power-exp .math-fraction .fraction-den {
+            padding: 0 1px;
+            min-width: 10px;
+            min-height: 12px;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+        
+        .power-exp .math-fraction .fraction-bar {
+            width: 14px;
+            height: 2px;
+            background: var(--text-primary);
+            margin: 0 2px;
+            transform: rotate(-65deg);
+            flex-shrink: 0;
+            align-self: center;
+        }
+        
+        .power-exp .math-fraction .math-slot {
+            min-width: 10px;
+            min-height: 12px;
+            padding: 1px 2px;
+        }
+        
+        /* Also apply to radical index */
+        .radical-index .math-fraction {
+            flex-direction: row;
+            align-items: center;
+            font-size: 1em;
+            margin: 0;
+            gap: 0;
+        }
+        
+        .radical-index .math-fraction .fraction-num {
+            padding: 0 1px;
+            min-width: 8px;
+            min-height: 10px;
+            align-self: flex-end;
+            margin-bottom: 1px;
+        }
+        
+        .radical-index .math-fraction .fraction-den {
+            padding: 0 1px;
+            min-width: 8px;
+            min-height: 10px;
+            align-self: flex-start;
+            margin-top: 1px;
+        }
+        
+        .radical-index .math-fraction .fraction-bar {
+            width: 10px;
+            height: 2px;
+            background: var(--text-primary);
+            margin: 0 1px;
+            transform: rotate(-65deg);
+            flex-shrink: 0;
+            align-self: center;
+        }
+        
+        .radical-index .math-fraction .math-slot {
+            min-width: 8px;
+            min-height: 10px;
+            padding: 1px 2px;
+        }
+
+        /* Fraction structure */
+        .math-fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 4px;
+        }
+
+        .fraction-num, .fraction-den {
+            padding: 2px 8px;
+            min-width: 28px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fraction-bar {
+            width: 100%;
+            height: 2px;
+            background: var(--text-primary);
+            margin: 2px 0;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Math Keyboard */
+        .math-keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            margin-top: 0.75rem;
+            max-width: 550px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .keyboard-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .keyboard-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .keyboard-buttons {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .math-key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            padding: 0.45rem 0.6rem;
+            min-width: 38px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .math-key:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-cyan);
+            transform: translateY(-1px);
+        }
+
+        .math-key:active {
+            transform: translateY(0);
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+        }
+
+        .math-key.action-key {
+            background: var(--bg-card-hover);
+            color: var(--text-secondary);
+        }
+
+        .math-key.action-key:hover {
+            background: var(--accent-magenta);
+            color: var(--text-primary);
+            border-color: var(--accent-magenta);
+        }
+
+        .math-key.nav-key:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+            border-color: var(--accent-yellow);
+        }
+
+        .math-key sup {
+            font-size: 0.7em;
         }
 
         .input-group {
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-
-        .answer-input {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5rem;
-            padding: 1rem 1.5rem;
-            width: 200px;
-            text-align: center;
-            background: var(--bg-card);
-            border: 2px solid var(--border-subtle);
-            border-radius: 12px;
-            color: var(--text-primary);
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .answer-input:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
-        }
-
-        .answer-input.correct {
-            border-color: var(--correct);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        .answer-input.incorrect {
-            border-color: var(--incorrect);
-            box-shadow: 0 0 20px rgba(255, 68, 102, 0.3);
-            animation: shake 0.5s ease;
+            margin-top: 0.5rem;
         }
 
         @keyframes shake {
@@ -629,8 +1008,8 @@
 
                 <div class="topic-group">
                     <div class="topic-group-title">Exponents & Radicals</div>
-                    <button class="topic-btn locked" data-topic="exponents">Exponent Laws <span class="coming-soon">Soon</span></button>
-                    <button class="topic-btn locked" data-topic="radicals">Simplify Radicals <span class="coming-soon">Soon</span></button>
+                    <button class="topic-btn" data-topic="exponent-laws">Exponent Laws</button>
+                    <button class="topic-btn" data-topic="radicals">Radicals & Rational Exponents</button>
                 </div>
 
                 <div class="topic-group">
@@ -672,8 +1051,84 @@
                     </div>
 
                     <div class="answer-section">
+                        <div class="math-input-container" id="mathInputContainer">
+                            <div class="math-editor" id="mathEditor" tabindex="0">
+                                <!-- Math elements will be inserted here -->
+                            </div>
+                            <input type="hidden" id="answerInput">
+                        </div>
+                        
+                        <div class="math-keyboard" id="mathKeyboard">
+                            <div class="keyboard-row">
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Radicals</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key" data-template="sqrt" title="Square root">√☐</button>
+                                        <button class="math-key" data-template="cbrt" title="Cube root">³√☐</button>
+                                        <button class="math-key" data-template="nthrt" title="nth root">ⁿ√☐</button>
+                                    </div>
+                                </div>
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Exponents</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key" data-template="power" title="Power">☐<sup>☐</sup></button>
+                                        <button class="math-key" data-template="frac" title="Fraction">☐/☐</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="keyboard-row">
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Variables</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key" data-char="a">a</button>
+                                        <button class="math-key" data-char="b">b</button>
+                                        <button class="math-key" data-char="x">x</button>
+                                        <button class="math-key" data-char="y">y</button>
+                                        <button class="math-key" data-char="m">m</button>
+                                        <button class="math-key" data-char="n">n</button>
+                                    </div>
+                                </div>
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Numbers</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key" data-char="1">1</button>
+                                        <button class="math-key" data-char="2">2</button>
+                                        <button class="math-key" data-char="3">3</button>
+                                        <button class="math-key" data-char="4">4</button>
+                                        <button class="math-key" data-char="5">5</button>
+                                        <button class="math-key" data-char="6">6</button>
+                                        <button class="math-key" data-char="7">7</button>
+                                        <button class="math-key" data-char="8">8</button>
+                                        <button class="math-key" data-char="9">9</button>
+                                        <button class="math-key" data-char="0">0</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="keyboard-row">
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Operators</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key" data-char="+">+</button>
+                                        <button class="math-key" data-char="-">−</button>
+                                        <button class="math-key" data-char="*">×</button>
+                                        <button class="math-key" data-char="/">÷</button>
+                                        <button class="math-key" data-char="(">(</button>
+                                        <button class="math-key" data-char=")">)</button>
+                                    </div>
+                                </div>
+                                <div class="keyboard-section">
+                                    <div class="keyboard-label">Edit</div>
+                                    <div class="keyboard-buttons">
+                                        <button class="math-key nav-key" data-action="left" title="Move left">←</button>
+                                        <button class="math-key nav-key" data-action="right" title="Move right">→</button>
+                                        <button class="math-key action-key" data-action="backspace" title="Delete">⌫</button>
+                                        <button class="math-key action-key" data-action="clear" title="Clear all">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="input-group">
-                            <input type="text" class="answer-input" id="answerInput" placeholder="?" autocomplete="off">
                             <button class="submit-btn" id="submitBtn">Check</button>
                         </div>
                     </div>
@@ -728,7 +1183,9 @@
         const problemGenerators = {
             'abs-simplify': generateAbsSimplify,
             'abs-equations': generateAbsEquations,
-            'abs-inequalities': generateAbsInequalities
+            'abs-inequalities': generateAbsInequalities,
+            'exponent-laws': generateExponentLaws,
+            'radicals': generateRadicals
         };
 
         // Theory content for each topic
@@ -772,6 +1229,37 @@
                 <h4>Example</h4>
                 <p>|x - 3| < 5 means -5 < x - 3 < 5, so -2 < x < 8</p>
                 <p>|x + 2| > 4 means x + 2 < -4 OR x + 2 > 4, so x < -6 OR x > 2</p>
+            `,
+            'exponent-laws': `
+                <h4>Exponent Laws</h4>
+                <div class="formula">
+                    <strong>Product Rule:</strong> aⁿ · aᵐ = aⁿ⁺ᵐ<br>
+                    <strong>Quotient Rule:</strong> aⁿ / aᵐ = aⁿ⁻ᵐ<br>
+                    <strong>Power Rule:</strong> (aⁿ)ᵐ = aⁿ·ᵐ<br>
+                    <strong>Negative Exponent:</strong> a⁻ⁿ = 1/aⁿ<br>
+                    <strong>Zero Exponent:</strong> a⁰ = 1 (where a ≠ 0)<br>
+                    <strong>Reciprocal:</strong> 1/a⁻ⁿ = aⁿ
+                </div>
+                <h4>Key Tips</h4>
+                <p>• Same base? Add or subtract exponents</p>
+                <p>• Power of a power? Multiply exponents</p>
+                <p>• Negative exponent? Flip to denominator (or numerator)</p>
+            `,
+            'radicals': `
+                <h4>Radicals & Rational Exponents</h4>
+                <div class="formula">
+                    <strong>Square root:</strong> √a = a<sup>1/2</sup><br>
+                    <strong>Cube root:</strong> ³√a = a<sup>1/3</sup><br>
+                    <strong>nth root:</strong> ⁿ√a = a<sup>1/n</sup><br>
+                    <strong>General:</strong> ⁿ√(aᵐ) = a<sup>m/n</sup>
+                </div>
+                <h4>Radical Properties</h4>
+                <div class="formula">
+                    √(ab) = √a · √b<br>
+                    √(a/b) = √a / √b<br>
+                    ⁿ√(aᵐ) = a<sup>m/n</sup>
+                </div>
+                <p><strong>Key insight:</strong> The index becomes the denominator, the power becomes the numerator.</p>
             `
         };
 
@@ -978,12 +1466,844 @@
             };
         }
 
+        // Generate Exponent Laws Problems
+        function generateExponentLaws() {
+            const types = ['product', 'quotient', 'power', 'negative', 'zero', 'combined'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let problem, answer, explanation, difficulty, instruction;
+            instruction = 'Simplify the expression (write as a single power, e.g., a^5 or 1/a^3):';
+            
+            // Use common bases
+            const bases = ['a', 'x', 'y', 'b', 'm'];
+            const base = bases[Math.floor(Math.random() * bases.length)];
+
+            switch(type) {
+                case 'product': {
+                    // a^n · a^m = a^(n+m)
+                    const n = Math.floor(Math.random() * 8) + 1;
+                    const m = Math.floor(Math.random() * 8) + 1;
+                    const result = n + m;
+                    problem = `${base}<sup>${n}</sup> · ${base}<sup>${m}</sup> = ?`;
+                    answer = `${base}^${result}`;
+                    difficulty = 'easy';
+                    explanation = `Using the product rule: ${base}<sup>${n}</sup> · ${base}<sup>${m}</sup> = ${base}<sup>${n}+${m}</sup> = ${base}<sup>${result}</sup>`;
+                    break;
+                }
+                case 'quotient': {
+                    // a^n / a^m = a^(n-m)
+                    const n = Math.floor(Math.random() * 8) + 4;
+                    const m = Math.floor(Math.random() * (n - 1)) + 1;
+                    const result = n - m;
+                    problem = `${base}<sup>${n}</sup> / ${base}<sup>${m}</sup> = ?`;
+                    answer = `${base}^${result}`;
+                    difficulty = 'easy';
+                    explanation = `Using the quotient rule: ${base}<sup>${n}</sup> / ${base}<sup>${m}</sup> = ${base}<sup>${n}−${m}</sup> = ${base}<sup>${result}</sup>`;
+                    break;
+                }
+                case 'power': {
+                    // (a^n)^m = a^(n·m)
+                    const n = Math.floor(Math.random() * 5) + 1;
+                    const m = Math.floor(Math.random() * 5) + 2;
+                    const result = n * m;
+                    problem = `(${base}<sup>${n}</sup>)<sup>${m}</sup> = ?`;
+                    answer = `${base}^${result}`;
+                    difficulty = 'easy';
+                    explanation = `Using the power rule: (${base}<sup>${n}</sup>)<sup>${m}</sup> = ${base}<sup>${n}·${m}</sup> = ${base}<sup>${result}</sup>`;
+                    break;
+                }
+                case 'negative': {
+                    // a^(-n) = 1/a^n or 1/a^(-n) = a^n
+                    const n = Math.floor(Math.random() * 6) + 1;
+                    const subtype = Math.random() < 0.5 ? 'toFraction' : 'fromFraction';
+                    
+                    if (subtype === 'toFraction') {
+                        problem = `${base}<sup>−${n}</sup> = ?`;
+                        answer = `1/${base}^${n}`;
+                        explanation = `Negative exponent means reciprocal: ${base}<sup>−${n}</sup> = 1/${base}<sup>${n}</sup>`;
+                    } else {
+                        problem = `1 / ${base}<sup>−${n}</sup> = ?`;
+                        answer = `${base}^${n}`;
+                        explanation = `Reciprocal of negative exponent: 1/${base}<sup>−${n}</sup> = ${base}<sup>${n}</sup>`;
+                    }
+                    difficulty = 'medium';
+                    break;
+                }
+                case 'zero': {
+                    // a^0 = 1
+                    const coefficient = Math.floor(Math.random() * 5) + 2;
+                    const innerExp = Math.floor(Math.random() * 5) + 1;
+                    const useParens = Math.random() < 0.5;
+                    
+                    if (useParens) {
+                        problem = `(${coefficient}${base}<sup>${innerExp}</sup>)<sup>0</sup> = ?`;
+                        explanation = `Any non-zero expression raised to power 0 equals 1: (${coefficient}${base}<sup>${innerExp}</sup>)<sup>0</sup> = 1`;
+                    } else {
+                        problem = `${base}<sup>0</sup> = ?`;
+                        explanation = `Any non-zero base raised to power 0 equals 1: ${base}<sup>0</sup> = 1`;
+                    }
+                    answer = '1';
+                    difficulty = 'easy';
+                    break;
+                }
+                case 'combined': {
+                    // More complex: (a^n · a^m) / a^p or similar
+                    const n = Math.floor(Math.random() * 5) + 2;
+                    const m = Math.floor(Math.random() * 5) + 2;
+                    const p = Math.floor(Math.random() * 4) + 1;
+                    const result = n + m - p;
+                    
+                    problem = `(${base}<sup>${n}</sup> · ${base}<sup>${m}</sup>) / ${base}<sup>${p}</sup> = ?`;
+                    
+                    if (result > 0) {
+                        answer = `${base}^${result}`;
+                    } else if (result === 0) {
+                        answer = '1';
+                    } else {
+                        answer = `1/${base}^${Math.abs(result)}`;
+                    }
+                    difficulty = 'hard';
+                    explanation = `First, use product rule in numerator: ${base}<sup>${n}+${m}</sup> = ${base}<sup>${n+m}</sup><br>Then quotient rule: ${base}<sup>${n+m}−${p}</sup> = ${base}<sup>${result}</sup>${result < 0 ? ` = 1/${base}<sup>${Math.abs(result)}</sup>` : ''}`;
+                    break;
+                }
+            }
+
+            return {
+                type: 'exponent-laws',
+                typeName: 'Exponent Laws',
+                instruction,
+                problem,
+                answer,
+                explanation,
+                difficulty
+            };
+        }
+
+        // Generate Radicals Problems
+        function generateRadicals() {
+            const types = ['toRational', 'fromRational', 'simplifyRadical', 'productRule', 'quotientRule'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let problem, answer, explanation, difficulty, instruction;
+            instruction = 'Convert or simplify (use ^ for exponents, e.g., a^(2/3)):';
+            
+            const bases = ['a', 'x', 'y', 'b'];
+            const base = bases[Math.floor(Math.random() * bases.length)];
+
+            switch(type) {
+                case 'toRational': {
+                    // √a = a^(1/2), ³√a = a^(1/3), etc.
+                    const indices = [2, 3, 4, 5];
+                    const index = indices[Math.floor(Math.random() * indices.length)];
+                    const power = Math.floor(Math.random() * 4) + 1;
+                    
+                    const indexSymbol = index === 2 ? '√' : (index === 3 ? '³√' : (index === 4 ? '⁴√' : '⁵√'));
+                    
+                    if (power === 1) {
+                        problem = `${indexSymbol}${base} = ?`;
+                        answer = `${base}^(1/${index})`;
+                        explanation = `The ${index === 2 ? 'square' : (index === 3 ? 'cube' : index + 'th')} root equals the 1/${index} power: ${indexSymbol}${base} = ${base}<sup>1/${index}</sup>`;
+                    } else {
+                        problem = `${indexSymbol}(${base}<sup>${power}</sup>) = ?`;
+                        // Simplify the fraction if possible
+                        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+                        const g = gcd(power, index);
+                        const numSimp = power / g;
+                        const denSimp = index / g;
+                        
+                        if (denSimp === 1) {
+                            answer = `${base}^${numSimp}`;
+                        } else {
+                            answer = `${base}^(${numSimp}/${denSimp})`;
+                        }
+                        explanation = `${indexSymbol}(${base}<sup>${power}</sup>) = ${base}<sup>${power}/${index}</sup>${g > 1 ? ` = ${base}<sup>${numSimp}/${denSimp}</sup>` : ''}`;
+                    }
+                    difficulty = power === 1 ? 'easy' : 'medium';
+                    break;
+                }
+                case 'fromRational': {
+                    // a^(1/2) = √a, a^(2/3) = ³√(a²), etc.
+                    const denoms = [2, 3, 4];
+                    const denom = denoms[Math.floor(Math.random() * denoms.length)];
+                    const numer = Math.floor(Math.random() * 3) + 1;
+                    
+                    problem = `${base}<sup>${numer}/${denom}</sup> = ? (write as radical)`;
+                    instruction = 'Convert to radical form (use sqrt for √, cbrt for ³√, or describe):';
+                    
+                    const indexWord = denom === 2 ? 'sqrt' : (denom === 3 ? 'cbrt' : `${denom}th root`);
+                    if (numer === 1) {
+                        answer = `${indexWord}(${base})`;
+                    } else {
+                        answer = `${indexWord}(${base}^${numer})`;
+                    }
+                    
+                    const indexSymbol = denom === 2 ? '√' : (denom === 3 ? '³√' : `⁴√`);
+                    explanation = `${base}<sup>${numer}/${denom}</sup> = ${indexSymbol}(${base}<sup>${numer}</sup>)${numer === 1 ? ` = ${indexSymbol}${base}` : ''}<br>The denominator ${denom} is the index (root), numerator ${numer} is the power.`;
+                    difficulty = 'medium';
+                    break;
+                }
+                case 'simplifyRadical': {
+                    // √(a^4) = a^2, ³√(a^6) = a^2, etc.
+                    const index = Math.random() < 0.5 ? 2 : 3;
+                    const multiplier = Math.floor(Math.random() * 3) + 1;
+                    const power = index * multiplier;
+                    
+                    const indexSymbol = index === 2 ? '√' : '³√';
+                    problem = `${indexSymbol}(${base}<sup>${power}</sup>) = ?`;
+                    answer = `${base}^${multiplier}`;
+                    difficulty = 'easy';
+                    explanation = `${indexSymbol}(${base}<sup>${power}</sup>) = ${base}<sup>${power}/${index}</sup> = ${base}<sup>${multiplier}</sup>`;
+                    break;
+                }
+                case 'productRule': {
+                    // √(ab) = √a · √b
+                    const base2 = bases.filter(b => b !== base)[0];
+                    const index = Math.random() < 0.7 ? 2 : 3;
+                    const indexSymbol = index === 2 ? '√' : '³√';
+                    
+                    const direction = Math.random() < 0.5 ? 'split' : 'combine';
+                    
+                    if (direction === 'split') {
+                        problem = `${indexSymbol}(${base}${base2}) = ?`;
+                        answer = `${indexSymbol}${base} * ${indexSymbol}${base2}`;
+                        instruction = 'Separate using the product rule (use * for multiplication):';
+                        explanation = `Product rule: ${indexSymbol}(${base}${base2}) = ${indexSymbol}${base} · ${indexSymbol}${base2}`;
+                    } else {
+                        problem = `${indexSymbol}${base} · ${indexSymbol}${base2} = ?`;
+                        answer = `${indexSymbol}(${base}${base2})`;
+                        instruction = 'Combine using the product rule:';
+                        explanation = `Product rule: ${indexSymbol}${base} · ${indexSymbol}${base2} = ${indexSymbol}(${base}${base2})`;
+                    }
+                    difficulty = 'easy';
+                    break;
+                }
+                case 'quotientRule': {
+                    // √(a/b) = √a / √b
+                    const base2 = bases.filter(b => b !== base)[0];
+                    const index = Math.random() < 0.7 ? 2 : 3;
+                    const indexSymbol = index === 2 ? '√' : '³√';
+                    
+                    const direction = Math.random() < 0.5 ? 'split' : 'combine';
+                    
+                    if (direction === 'split') {
+                        problem = `${indexSymbol}(${base}/${base2}) = ?`;
+                        answer = `${indexSymbol}${base} / ${indexSymbol}${base2}`;
+                        instruction = 'Separate using the quotient rule:';
+                        explanation = `Quotient rule: ${indexSymbol}(${base}/${base2}) = ${indexSymbol}${base} / ${indexSymbol}${base2}`;
+                    } else {
+                        problem = `${indexSymbol}${base} / ${indexSymbol}${base2} = ?`;
+                        answer = `${indexSymbol}(${base}/${base2})`;
+                        instruction = 'Combine using the quotient rule:';
+                        explanation = `Quotient rule: ${indexSymbol}${base} / ${indexSymbol}${base2} = ${indexSymbol}(${base}/${base2})`;
+                    }
+                    difficulty = 'easy';
+                    break;
+                }
+            }
+
+            return {
+                type: 'radicals',
+                typeName: 'Radicals & Rational Exponents',
+                instruction,
+                problem,
+                answer,
+                explanation,
+                difficulty
+            };
+        }
+
         // UI Updates
         function updateStats() {
             document.getElementById('totalProblems').textContent = state.stats.total;
             document.getElementById('correctCount').textContent = state.stats.correct;
             document.getElementById('incorrectCount').textContent = state.stats.incorrect;
             document.getElementById('streakCount').textContent = state.stats.streak;
+        }
+
+        // ============ STRUCTURED MATH EDITOR ============
+        
+        // Editor state
+        const editorState = {
+            elements: [], // Array of math elements
+            activeSlot: null, // Currently active slot element
+            cursorPosition: 0 // For simple text entry
+        };
+
+        // Create a simple character element
+        function createCharElement(char) {
+            const span = document.createElement('span');
+            span.className = 'math-element math-char';
+            span.textContent = char;
+            span.dataset.type = 'char';
+            span.dataset.value = char;
+            return span;
+        }
+        
+        // Create an operator element (visible, styled differently)
+        function createOperatorElement(operator) {
+            const span = document.createElement('span');
+            span.className = 'math-element math-operator';
+            span.dataset.type = 'operator';
+            
+            // Display nicer symbols
+            const displayMap = {
+                '*': '×',
+                '/': '÷',
+                '+': '+',
+                '-': '−'
+            };
+            span.textContent = displayMap[operator] || operator;
+            span.dataset.value = operator;
+            span.tabIndex = 0;
+            return span;
+        }
+        
+        // Check if character is an operator
+        function isOperator(char) {
+            return ['+', '-', '*', '/', '×', '÷'].includes(char);
+        }
+
+        // Create an empty slot (placeholder)
+        function createSlot(type = 'default') {
+            const span = document.createElement('span');
+            span.className = 'math-slot';
+            span.dataset.type = 'slot';
+            span.dataset.slotType = type;
+            span.tabIndex = 0;
+            return span;
+        }
+
+        // Create a radical structure: ⁿ√(content)
+        function createRadicalElement(indexValue = '', hasIndex = true) {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'math-element math-radical';
+            wrapper.dataset.type = 'radical';
+            
+            // Index slot (for nth root)
+            if (hasIndex) {
+                const indexSlot = createSlot('index');
+                indexSlot.className += ' radical-index';
+                if (indexValue) {
+                    indexSlot.textContent = indexValue;
+                    indexSlot.classList.add('filled');
+                    indexSlot.dataset.value = indexValue;
+                }
+                wrapper.appendChild(indexSlot);
+            }
+            
+            // Radical symbol
+            const symbol = document.createElement('span');
+            symbol.className = 'radical-symbol';
+            symbol.textContent = '√';
+            wrapper.appendChild(symbol);
+            
+            // Radicand (content under the radical)
+            const content = document.createElement('span');
+            content.className = 'radical-content';
+            const contentSlot = createSlot('radicand');
+            content.appendChild(contentSlot);
+            wrapper.appendChild(content);
+            
+            return wrapper;
+        }
+
+        // Create a power structure: base^exp
+        function createPowerElement() {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'math-element math-power';
+            wrapper.dataset.type = 'power';
+            
+            // Base slot
+            const baseSlot = createSlot('base');
+            baseSlot.className += ' power-base';
+            wrapper.appendChild(baseSlot);
+            
+            // Exponent slot
+            const expSlot = createSlot('exponent');
+            expSlot.className += ' power-exp';
+            wrapper.appendChild(expSlot);
+            
+            return wrapper;
+        }
+
+        // Create a fraction structure
+        function createFractionElement() {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'math-element math-fraction';
+            wrapper.dataset.type = 'fraction';
+            
+            // Numerator
+            const numSlot = createSlot('numerator');
+            numSlot.className += ' fraction-num';
+            wrapper.appendChild(numSlot);
+            
+            // Fraction bar
+            const bar = document.createElement('span');
+            bar.className = 'fraction-bar';
+            wrapper.appendChild(bar);
+            
+            // Denominator
+            const denSlot = createSlot('denominator');
+            denSlot.className += ' fraction-den';
+            wrapper.appendChild(denSlot);
+            
+            return wrapper;
+        }
+
+        // Get all navigable elements (slots and operators) in document order
+        function getAllSlots() {
+            return Array.from(document.querySelectorAll('#mathEditor .math-slot'));
+        }
+        
+        // Get all focusable elements including operators
+        function getAllFocusableElements() {
+            return Array.from(document.querySelectorAll('#mathEditor .math-slot, #mathEditor .math-operator'));
+        }
+
+        // Set active slot
+        function setActiveSlot(slot) {
+            // Clear previous active from both slots and operators
+            getAllFocusableElements().forEach(s => s.classList.remove('active'));
+            
+            if (slot) {
+                slot.classList.add('active');
+                editorState.activeSlot = slot;
+                slot.focus();
+            } else {
+                editorState.activeSlot = null;
+            }
+        }
+
+        // Find next/previous focusable element (slot or operator)
+        function navigateSlot(direction) {
+            const elements = getAllFocusableElements();
+            if (elements.length === 0) return;
+            
+            const currentIndex = elements.indexOf(editorState.activeSlot);
+            let newIndex;
+            
+            if (direction === 'right') {
+                newIndex = currentIndex < elements.length - 1 ? currentIndex + 1 : 0;
+            } else {
+                newIndex = currentIndex > 0 ? currentIndex - 1 : elements.length - 1;
+            }
+            
+            setActiveSlot(elements[newIndex]);
+        }
+
+        // Insert character into active slot
+        function insertIntoSlot(char) {
+            const editor = document.getElementById('mathEditor');
+            
+            // If no slot active, ensure we have one
+            if (!editorState.activeSlot) {
+                ensureSlotExists();
+            }
+            
+            // Now we should have an active slot
+            if (!editorState.activeSlot) {
+                return; // Safety check
+            }
+            
+            const slot = editorState.activeSlot;
+            
+            // Check if we're in an exponent slot and typing /
+            // This should create a fraction for the exponent
+            const isInExponent = slot.classList.contains('power-exp') || 
+                                 slot.closest('.power-exp') !== null;
+            
+            if ((char === '/' || char === '÷') && isInExponent) {
+                // Get the current value as numerator
+                const currentValue = slot.dataset.value || '';
+                
+                // Create a fraction element
+                const fracElement = createFractionElement();
+                const numSlot = fracElement.querySelector('[data-slot-type="numerator"]');
+                const denSlot = fracElement.querySelector('[data-slot-type="denominator"]');
+                
+                // If there's existing content, put it in the numerator
+                if (currentValue && currentValue !== '[complex]') {
+                    numSlot.textContent = currentValue;
+                    numSlot.dataset.value = currentValue;
+                    numSlot.classList.add('filled');
+                }
+                
+                // Clear the slot and insert fraction
+                slot.innerHTML = '';
+                slot.appendChild(fracElement);
+                slot.classList.add('filled');
+                slot.dataset.value = '[complex]';
+                
+                // Focus on denominator if numerator has value, else numerator
+                setActiveSlot(currentValue ? denSlot : numSlot);
+                return;
+            }
+            
+            // Check if this is an operator - handle specially
+            if (isOperator(char)) {
+                // Operators go between elements, not inside slots
+                // Find the parent element and insert operator after it
+                const parentElement = slot.closest('.math-element') || slot;
+                const operatorEl = createOperatorElement(char);
+                
+                // Insert operator after the current element
+                if (parentElement.nextSibling) {
+                    editor.insertBefore(operatorEl, parentElement.nextSibling);
+                } else {
+                    editor.appendChild(operatorEl);
+                }
+                
+                // Create a new slot after the operator for the next input
+                const newSlot = createSlot('main');
+                if (operatorEl.nextSibling) {
+                    editor.insertBefore(newSlot, operatorEl.nextSibling);
+                } else {
+                    editor.appendChild(newSlot);
+                }
+                
+                // Move focus to the new slot
+                setActiveSlot(newSlot);
+                return;
+            }
+            
+            // Regular character - insert into slot
+            const currentValue = slot.dataset.value || '';
+            const newValue = currentValue + char;
+            
+            slot.textContent = newValue;
+            slot.dataset.value = newValue;
+            slot.classList.add('filled');
+        }
+
+        // Remove last character from active slot
+        function backspaceSlot() {
+            const editor = document.getElementById('mathEditor');
+            
+            // If no active slot, ensure we have one
+            if (!editorState.activeSlot) {
+                ensureSlotExists();
+                return;
+            }
+            
+            const activeEl = editorState.activeSlot;
+            
+            // Check if we're on an operator - delete it
+            if (activeEl.classList.contains('math-operator')) {
+                const allElements = getAllFocusableElements();
+                const currentIndex = allElements.indexOf(activeEl);
+                activeEl.remove();
+                
+                // Navigate to previous element
+                const remainingElements = getAllFocusableElements();
+                if (remainingElements.length > 0) {
+                    const newIndex = Math.max(0, currentIndex - 1);
+                    setActiveSlot(remainingElements[newIndex] || remainingElements[0]);
+                } else {
+                    ensureSlotExists();
+                }
+                return;
+            }
+            
+            const slot = activeEl;
+            const currentValue = slot.dataset.value || '';
+            
+            if (currentValue.length > 0) {
+                const newValue = currentValue.slice(0, -1);
+                slot.textContent = newValue;
+                slot.dataset.value = newValue;
+                
+                if (newValue.length === 0) {
+                    slot.classList.remove('filled');
+                }
+            } else {
+                // If slot is empty, try to remove the parent structure
+                const parent = slot.closest('.math-element');
+                if (parent && (parent.classList.contains('math-radical') || 
+                    parent.classList.contains('math-power') ||
+                    parent.classList.contains('math-fraction'))) {
+                    const elements = getAllFocusableElements();
+                    const currentIndex = elements.indexOf(slot);
+                    parent.remove();
+                    
+                    // Navigate to previous element or first available
+                    const remainingElements = getAllFocusableElements();
+                    if (remainingElements.length > 0) {
+                        const newIndex = Math.min(currentIndex, remainingElements.length - 1);
+                        setActiveSlot(remainingElements[Math.max(0, newIndex - 1)] || remainingElements[0]);
+                    } else {
+                        // No slots left, create one
+                        ensureSlotExists();
+                    }
+                } else if (slot.dataset.slotType === 'main') {
+                    // It's the main slot and it's empty - just keep it
+                    return;
+                }
+            }
+            
+            // Always ensure at least one slot exists
+            ensureSlotExists();
+        }
+        
+        // Ensure there's always at least one slot in the editor
+        function ensureSlotExists() {
+            const editor = document.getElementById('mathEditor');
+            const slots = getAllSlots();
+            
+            if (slots.length === 0) {
+                const initialSlot = createSlot('main');
+                editor.appendChild(initialSlot);
+                setActiveSlot(initialSlot);
+            } else if (!editorState.activeSlot) {
+                setActiveSlot(slots[0]);
+            }
+        }
+
+        // Clear the editor
+        function clearEditor() {
+            const editor = document.getElementById('mathEditor');
+            editor.innerHTML = '';
+            editorState.elements = [];
+            editorState.activeSlot = null;
+            
+            // Add initial slot
+            const initialSlot = createSlot('main');
+            editor.appendChild(initialSlot);
+            setActiveSlot(initialSlot);
+        }
+
+        // Insert a template (radical, power, fraction)
+        function insertTemplate(templateType) {
+            const editor = document.getElementById('mathEditor');
+            let element;
+            let firstSlot;
+            
+            switch(templateType) {
+                case 'sqrt':
+                    element = createRadicalElement('', false);
+                    firstSlot = element.querySelector('.math-slot');
+                    break;
+                case 'cbrt':
+                    element = createRadicalElement('3', true);
+                    // For cube root, the first slot to fill is the radicand
+                    firstSlot = element.querySelector('[data-slot-type="radicand"]');
+                    break;
+                case 'nthrt':
+                    element = createRadicalElement('', true);
+                    firstSlot = element.querySelector('.radical-index');
+                    break;
+                case 'power':
+                    element = createPowerElement();
+                    firstSlot = element.querySelector('[data-slot-type="base"]');
+                    break;
+                case 'frac':
+                    element = createFractionElement();
+                    firstSlot = element.querySelector('[data-slot-type="numerator"]');
+                    break;
+            }
+            
+            if (element) {
+                if (editorState.activeSlot && !editorState.activeSlot.dataset.value) {
+                    // Check if the active slot is inside a structure (not the main slot)
+                    const parentStructure = editorState.activeSlot.closest('.math-power, .math-radical, .math-fraction');
+                    const isMainSlot = editorState.activeSlot.dataset.slotType === 'main';
+                    
+                    if (parentStructure && !isMainSlot) {
+                        // Insert the new element INSIDE the current slot (nested structure)
+                        // Convert the slot to a container that holds the new element
+                        const slot = editorState.activeSlot;
+                        slot.innerHTML = '';
+                        slot.appendChild(element);
+                        slot.classList.add('filled');
+                        slot.dataset.value = '[complex]'; // Mark as containing complex structure
+                    } else {
+                        // It's a main slot or top-level, replace it entirely
+                        editorState.activeSlot.replaceWith(element);
+                    }
+                } else {
+                    // No active slot or slot has value - append to editor
+                    editor.appendChild(element);
+                }
+                
+                setActiveSlot(firstSlot);
+            }
+        }
+
+        // Convert editor content to string for answer checking
+        function getEditorValue() {
+            const editor = document.getElementById('mathEditor');
+            return serializeElement(editor);
+        }
+
+        function serializeElement(element) {
+            let result = '';
+            
+            for (const child of element.children) {
+                if (child.classList.contains('math-char')) {
+                    result += child.dataset.value || child.textContent;
+                } else if (child.classList.contains('math-operator')) {
+                    // Operator element - use its stored value
+                    result += ` ${child.dataset.value || child.textContent} `;
+                } else if (child.classList.contains('math-slot')) {
+                    // Check if slot contains nested structure (children take priority)
+                    if (child.children.length > 0) {
+                        result += serializeElement(child);
+                    } else {
+                        // Only use dataset.value if no children and value is not [complex]
+                        const val = child.dataset.value || '';
+                        if (val !== '[complex]') {
+                            result += val;
+                        }
+                    }
+                } else if (child.classList.contains('radical-content')) {
+                    // Handle radical-content directly - serialize its contents
+                    result += serializeElement(child);
+                } else if (child.classList.contains('math-radical')) {
+                    const indexEl = child.querySelector(':scope > .radical-index, :scope > span > .radical-index');
+                    const contentEl = child.querySelector('.radical-content');
+                    
+                    // Get index - check for nested content first
+                    let index = '2';
+                    if (indexEl) {
+                        if (indexEl.children.length > 0) {
+                            index = serializeElement(indexEl);
+                        } else {
+                            index = indexEl.dataset.value || '2';
+                        }
+                    }
+                    
+                    const content = contentEl ? serializeElement(contentEl) : '';
+                    
+                    if (index === '2' || index === '' || index === '[complex]') {
+                        result += `√(${content})`;
+                    } else if (index === '3') {
+                        result += `³√(${content})`;
+                    } else if (index === '4') {
+                        result += `⁴√(${content})`;
+                    } else {
+                        result += `${index}√(${content})`;
+                    }
+                } else if (child.classList.contains('math-power')) {
+                    const baseEl = child.querySelector('.power-base');
+                    const expEl = child.querySelector('.power-exp');
+                    
+                    // Get base - check for nested content
+                    let base = '';
+                    if (baseEl) {
+                        if (baseEl.children.length > 0) {
+                            base = serializeElement(baseEl);
+                        } else {
+                            base = baseEl.dataset.value || '';
+                        }
+                    }
+                    
+                    // Get exponent - check for nested content (like fractions)
+                    let exp = '';
+                    if (expEl) {
+                        if (expEl.children.length > 0) {
+                            exp = serializeElement(expEl);
+                        } else {
+                            exp = expEl.dataset.value || '';
+                        }
+                    }
+                    
+                    // Clean up [complex] markers
+                    if (base === '[complex]') base = '';
+                    if (exp === '[complex]') exp = '';
+                    
+                    result += `${base}^(${exp})`;
+                } else if (child.classList.contains('math-fraction')) {
+                    const numEl = child.querySelector('.fraction-num');
+                    const denEl = child.querySelector('.fraction-den');
+                    
+                    // Get numerator - check for nested content
+                    let num = '';
+                    if (numEl) {
+                        if (numEl.children.length > 0) {
+                            num = serializeElement(numEl);
+                        } else {
+                            num = numEl.dataset.value || '';
+                        }
+                    }
+                    
+                    // Get denominator - check for nested content
+                    let den = '';
+                    if (denEl) {
+                        if (denEl.children.length > 0) {
+                            den = serializeElement(denEl);
+                        } else {
+                            den = denEl.dataset.value || '';
+                        }
+                    }
+                    
+                    // Clean up [complex] markers
+                    if (num === '[complex]') num = '';
+                    if (den === '[complex]') den = '';
+                    
+                    result += `(${num})/(${den})`;
+                } else if (child.children.length > 0) {
+                    result += serializeElement(child);
+                }
+            }
+            
+            return result;
+        }
+
+        // Initialize editor
+        function initEditor() {
+            const editor = document.getElementById('mathEditor');
+            editor.innerHTML = '';
+            
+            const initialSlot = createSlot('main');
+            editor.appendChild(initialSlot);
+            setActiveSlot(initialSlot);
+            
+            // Click on editor focuses
+            editor.addEventListener('click', (e) => {
+                if (e.target.classList.contains('math-slot')) {
+                    setActiveSlot(e.target);
+                } else {
+                    // Click anywhere on editor - ensure slot exists and focus it
+                    ensureSlotExists();
+                    const slots = getAllSlots();
+                    if (slots.length > 0 && !editorState.activeSlot) {
+                        setActiveSlot(slots[slots.length - 1]);
+                    }
+                }
+                editor.focus();
+            });
+            
+            // Focus handler - ensure slot is active when editor gets focus
+            editor.addEventListener('focus', () => {
+                ensureSlotExists();
+            });
+            
+            // Keyboard navigation
+            editor.addEventListener('keydown', (e) => {
+                // Ensure we have a slot before processing keys
+                ensureSlotExists();
+                
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    navigateSlot('left');
+                } else if (e.key === 'ArrowRight' || e.key === 'Tab') {
+                    e.preventDefault();
+                    navigateSlot('right');
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    backspaceSlot();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (document.getElementById('feedback').classList.contains('show')) {
+                        nextProblem();
+                    } else {
+                        checkAnswer();
+                    }
+                } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                    // Single character input
+                    e.preventDefault();
+                    insertIntoSlot(e.key);
+                }
+            });
         }
 
         function showProblem(problemData) {
@@ -997,10 +2317,13 @@
             badge.textContent = problemData.difficulty.charAt(0).toUpperCase() + problemData.difficulty.slice(1);
             badge.className = `difficulty-badge ${problemData.difficulty}`;
             
-            document.getElementById('answerInput').value = '';
-            document.getElementById('answerInput').className = 'answer-input';
+            // Reset editor
+            const editor = document.getElementById('mathEditor');
+            editor.classList.remove('correct', 'incorrect');
+            clearEditor();
+            
             document.getElementById('feedback').className = 'feedback';
-            document.getElementById('answerInput').focus();
+            document.getElementById('mathEditor').focus();
             
             // Update theory
             if (theoryContent[problemData.type]) {
@@ -1008,18 +2331,343 @@
             }
         }
 
+        // Normalize answer for comparison
+        function normalizeAnswer(ans) {
+            let normalized = ans
+                .replace(/⁴√/g, '4thrt')  // Must come before √
+                .replace(/³√/g, 'cbrt')   // Must come before √
+                .replace(/⁴/g, '4')       // Standalone superscript 4
+                .replace(/³/g, '3')       // Standalone superscript 3
+                .replace(/²/g, '^2')      // Superscript 2
+                .replace(/¹/g, '^1')      // Superscript 1
+                .replace(/√/g, 'sqrt')
+                .toLowerCase()
+                .replace(/\s/g, '')
+                .replace(/·/g, '*')
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/−/g, '-')
+                .replace(/\*\*/g, '^')
+                .replace(/2sqrt/g, 'sqrt')
+                .replace(/\)\(/g, ')*(');
+            
+            // Normalize root notations - handle all variations
+            normalized = normalized.replace(/4throot/g, '4thrt');
+            normalized = normalized.replace(/fourthroot/g, '4thrt');
+            normalized = normalized.replace(/4thrt\^1(?!\d)/g, '4thrt'); // Remove ^1 after 4thrt
+            
+            // Normalize power notation: ^(2) -> ^2 for single digits
+            normalized = normalized.replace(/\^\((\d)\)/g, '^$1');
+            
+            // Normalize x^1 to x (and x to x^1 for comparison)
+            normalized = normalized.replace(/\^1(?!\d)/g, ''); // Remove ^1 (but not ^10, ^11, etc)
+            
+            // Remove unnecessary parentheses around single variables/numbers
+            // sqrt(a) -> sqrta for single chars
+            normalized = normalized.replace(/sqrt\(([a-z0-9])\)/g, 'sqrt$1');
+            normalized = normalized.replace(/cbrt\(([a-z0-9])\)/g, 'cbrt$1');
+            normalized = normalized.replace(/4thrt\(([a-z0-9])\)/g, '4thrt$1');
+            
+            // Handle sqrt(x^2) format - keep normalized
+            normalized = normalized.replace(/sqrt\(([a-z])\^(\d+)\)/g, 'sqrt($1^$2)');
+            normalized = normalized.replace(/cbrt\(([a-z])\^(\d+)\)/g, 'cbrt($1^$2)');
+            normalized = normalized.replace(/4thrt\(([a-z])\^(\d+)\)/g, '4thrt($1^$2)');
+            
+            // Handle (sqrt...) patterns - remove outer parens around sqrt expressions
+            normalized = normalized.replace(/\((sqrt[a-z0-9^()]+)\)/g, '$1');
+            normalized = normalized.replace(/\((cbrt[a-z0-9^()]+)\)/g, '$1');
+            normalized = normalized.replace(/\((4thrt[a-z0-9^()]+)\)/g, '$1');
+            
+            // Also handle cases like (a)/(b) -> a/b for single chars
+            normalized = normalized.replace(/\(([a-z0-9])\)/g, '$1');
+            
+            // Handle nested parens: ((x)) -> x
+            while (normalized.includes('((')) {
+                normalized = normalized.replace(/\(\(([^()]+)\)\)/g, '($1)');
+            }
+            
+            return normalized;
+        }
+        
+        // Check if two math expressions are equivalent
+        function areEquivalent(userAns, correctAns) {
+            // Direct match
+            if (userAns === correctAns) return true;
+            
+            // Try removing all parentheses for simple expressions
+            const stripParens = (s) => s.replace(/[()]/g, '');
+            if (stripParens(userAns) === stripParens(correctAns)) return true;
+            
+            // Handle x = x^1 equivalence more thoroughly
+            const normalizeExponent = (s) => {
+                // Add ^1 to bare variables for comparison, then normalize
+                let result = s;
+                // Match single variable not followed by ^ 
+                result = result.replace(/([a-z])(?!\^)(?![a-z0-9])/g, '$1^1');
+                // Now remove all ^1
+                result = result.replace(/\^1(?!\d)/g, '');
+                return result;
+            };
+            
+            if (normalizeExponent(userAns) === normalizeExponent(correctAns)) return true;
+            if (normalizeExponent(stripParens(userAns)) === normalizeExponent(stripParens(correctAns))) return true;
+            
+            // Extract the key components: root type, variable, and power
+            const extractComponents = (s) => {
+                const rootMatch = s.match(/(sqrt|cbrt|4thrt)/);
+                const varMatch = s.match(/[a-z]/g);
+                const powMatch = s.match(/\^(\d+)/);
+                return {
+                    root: rootMatch ? rootMatch[1] : null,
+                    vars: varMatch ? varMatch.sort().join('') : '',
+                    pow: powMatch ? powMatch[1] : '1' // Default to 1 if no power
+                };
+            };
+            
+            const userComp = extractComponents(userAns);
+            const correctComp = extractComponents(correctAns);
+            
+            // Check if root type, variables, and power all match
+            if (userComp.root === correctComp.root && 
+                userComp.vars === correctComp.vars && 
+                userComp.pow === correctComp.pow) {
+                return true;
+            }
+            
+            return false;
+        }
+
         function checkAnswer() {
-            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase().replace(/\s/g, '');
-            const correctAnswer = state.currentProblem.answer.toLowerCase().replace(/\s/g, '');
+            const rawUserAnswer = getEditorValue();
+            const userAnswer = normalizeAnswer(rawUserAnswer);
+            const correctAnswer = normalizeAnswer(state.currentProblem.answer);
+            
+            // Debug logging
+            console.log('=== ANSWER CHECK DEBUG ===');
+            console.log('Raw user answer:', rawUserAnswer);
+            console.log('Original correct:', state.currentProblem.answer);
+            console.log('Normalized user:', userAnswer);
+            console.log('Normalized correct:', correctAnswer);
             
             // Parse answers for comparison (handle multiple solutions)
             const parseAnswers = (ans) => {
                 return ans.split(',').map(a => a.trim()).sort().join(',');
             };
             
-            const isCorrect = parseAnswers(userAnswer) === parseAnswers(correctAnswer);
+            // Check if answers match - try multiple methods
+            let isCorrect = parseAnswers(userAnswer) === parseAnswers(correctAnswer);
+            console.log('Direct match:', isCorrect);
             
-            const input = document.getElementById('answerInput');
+            // If not exact match, try equivalence check
+            if (!isCorrect) {
+                isCorrect = areEquivalent(userAnswer, correctAnswer);
+                console.log('After areEquivalent:', isCorrect);
+            }
+            
+            // Additional check: strip all non-essential characters and compare
+            if (!isCorrect) {
+                const simplify = (s) => s.replace(/[()^]/g, '').replace(/sqrt|cbrt|4thrt|4throot/g, 'R');
+                const userSimp = simplify(userAnswer);
+                const correctSimp = simplify(correctAnswer);
+                
+                console.log('Simplify check - user:', userSimp, 'correct:', correctSimp);
+                
+                if (userSimp === correctSimp) {
+                    // Same content, just formatted differently
+                    // Verify it has the right root type
+                    const userRoot = userAnswer.includes('4thrt') || userAnswer.includes('4throot') ? '4' :
+                                    userAnswer.includes('cbrt') ? '3' : 
+                                    userAnswer.includes('sqrt') ? '2' : '0';
+                    const correctRoot = correctAnswer.includes('4thrt') || correctAnswer.includes('4throot') ? '4' :
+                                       correctAnswer.includes('cbrt') ? '3' : 
+                                       correctAnswer.includes('sqrt') ? '2' : '0';
+                    
+                    if (userRoot === correctRoot) {
+                        isCorrect = true;
+                    }
+                }
+            }
+            
+            // Final fallback: extract variable, power, and root type and compare
+            if (!isCorrect) {
+                const extractAll = (s) => {
+                    const root = s.includes('cbrt') ? 'cbrt' : 
+                                 (s.includes('4thrt') || s.includes('4throot')) ? '4thrt' : 
+                                 (s.includes('sqrt') ? 'sqrt' : 'none');
+                    const vars = (s.match(/[a-z]/g) || []).sort().join('');
+                    // Get powers, but filter out the '4' from '4thrt' or '4th'
+                    let powers = s.replace(/4th(rt|root)?/g, '').match(/\d+/g) || [];
+                    // If no power found, it's implicitly 1
+                    if (powers.length === 0) powers = ['1'];
+                    // Sort and join
+                    const powerStr = powers.sort().join(',');
+                    return `${root}:${vars}:${powerStr}`;
+                };
+                
+                console.log('Final check - user:', extractAll(userAnswer), 'correct:', extractAll(correctAnswer));
+                
+                if (extractAll(userAnswer) === extractAll(correctAnswer)) {
+                    isCorrect = true;
+                }
+            }
+            
+            // Extra fallback: just compare root type and variables (for simple cases like ⁴√b = 4th root(b))
+            if (!isCorrect) {
+                const extractSimple = (s) => {
+                    const root = s.includes('cbrt') ? 'cbrt' : 
+                                 (s.includes('4thrt') || s.includes('4throot')) ? '4thrt' : 
+                                 (s.includes('sqrt') ? 'sqrt' : 'none');
+                    const vars = (s.match(/[a-z]/g) || []).sort().join('');
+                    // Check if there's a power greater than 1
+                    const powersInContent = s.replace(/4th(rt|root)?/g, '').replace(/sqrt|cbrt/g, '').match(/\d+/g) || [];
+                    const hasPower = powersInContent.some(p => parseInt(p) > 1);
+                    return `${root}:${vars}:${hasPower}`;
+                };
+                
+                console.log('Simple check - user:', extractSimple(userAnswer), 'correct:', extractSimple(correctAnswer));
+                
+                if (extractSimple(userAnswer) === extractSimple(correctAnswer)) {
+                    isCorrect = true;
+                }
+            }
+            
+            // Ultimate fallback: normalize heavily and compare core content
+            if (!isCorrect) {
+                const ultraSimplify = (s) => {
+                    // Remove all formatting, keep only: root type indicator + variables + numbers
+                    let simplified = s.toLowerCase()
+                        .replace(/\^1(?!\d)/g, '') // Remove ^1 (power of 1 = no power)
+                        .replace(/4throot|4thrt/g, '4R')
+                        .replace(/cbrt/g, '3R')
+                        .replace(/sqrt/g, '2R')
+                        .replace(/[^a-z0-9r]/g, ''); // Remove everything except alphanumeric and R
+                    return simplified;
+                };
+                
+                console.log('Ultra simple - user:', ultraSimplify(userAnswer), 'correct:', ultraSimplify(correctAnswer));
+                
+                if (ultraSimplify(userAnswer) === ultraSimplify(correctAnswer)) {
+                    isCorrect = true;
+                }
+            }
+            
+            // Final final fallback: compare just root type and variable
+            if (!isCorrect) {
+                const rootAndVar = (s) => {
+                    const root = s.includes('4thrt') || s.includes('4throot') ? '4' : 
+                                 s.includes('cbrt') ? '3' : 
+                                 s.includes('sqrt') ? '2' : '0';
+                    const vars = (s.match(/[a-z]/g) || []).sort().join('');
+                    // Only get powers > 1
+                    const significantPowers = (s.replace(/4th(rt|root)?|sqrt|cbrt/g, '').match(/\d+/g) || [])
+                        .filter(p => parseInt(p) > 1)
+                        .sort()
+                        .join(',');
+                    return `${root}:${vars}:${significantPowers}`;
+                };
+                
+                console.log('Root+Var check - user:', rootAndVar(userAnswer), 'correct:', rootAndVar(correctAnswer));
+                
+                if (rootAndVar(userAnswer) === rootAndVar(correctAnswer)) {
+                    isCorrect = true;
+                }
+            }
+            
+            // ABSOLUTE FINAL: Just check root index + variable + any number > 1
+            if (!isCorrect) {
+                const absoluteFinal = (s) => {
+                    // Normalize the string first - remove spaces and convert Unicode
+                    let normalized = s
+                        .replace(/⁴√/g, '4THRT').replace(/³√/g, 'CBRT').replace(/√/g, 'SQRT')
+                        .replace(/⁴/g, '4').replace(/³/g, '3').replace(/²/g, '2').replace(/¹/g, '1')
+                        .toLowerCase()
+                        .replace(/\s/g, '');
+                    
+                    // Determine root type
+                    let rootIdx = '2';
+                    if (normalized.includes('4thrt') || normalized.includes('4throot')) rootIdx = '4';
+                    else if (normalized.includes('cbrt')) rootIdx = '3';
+                    else if (normalized.includes('sqrt')) rootIdx = '2';
+                    
+                    // Remove root notation to get just the content
+                    const content = normalized
+                        .replace(/4thrt|4throot|cbrt|sqrt/g, '')
+                        .replace(/[()^]/g, '');
+                    
+                    // Get variable(s) - only a-z that aren't part of root notation
+                    const vars = (content.match(/[a-z]/g) || []).sort().join('');
+                    
+                    // Get exponent numbers (filter out 1)
+                    const allNums = content.match(/\d+/g) || [];
+                    const expNums = allNums.filter(n => n !== '1').sort().join('');
+                    
+                    return `R${rootIdx}:${vars}:${expNums}`;
+                };
+                
+                const userFinal = absoluteFinal(rawUserAnswer);
+                const correctFinal = absoluteFinal(state.currentProblem.answer);
+                
+                console.log('ABSOLUTE FINAL - user:', userFinal, 'correct:', correctFinal);
+                
+                if (userFinal === correctFinal) {
+                    isCorrect = true;
+                }
+            }
+            
+            // SUPER FINAL: Extract root index from visual, get ALL numbers from both, compare
+            if (!isCorrect) {
+                const superFinal = (s, isVisual = false) => {
+                    let rootIdx = '2';
+                    
+                    // Check for visual unicode root symbols
+                    if (s.includes('⁴') || s.includes('⁴√')) rootIdx = '4';
+                    else if (s.includes('³') || s.includes('³√')) rootIdx = '3';
+                    // Check for text root notation
+                    else if (s.toLowerCase().includes('4th')) rootIdx = '4';
+                    else if (s.toLowerCase().includes('cbrt')) rootIdx = '3';
+                    else if (s.includes('√') || s.toLowerCase().includes('sqrt')) rootIdx = '2';
+                    
+                    // Get variables
+                    const vars = (s.match(/[a-z]/gi) || []).map(v => v.toLowerCase()).sort().join('');
+                    
+                    // For exponent, look for ^number or superscript patterns
+                    let exp = '';
+                    const expMatch = s.match(/\^[\(\[]?(\d+)/);
+                    if (expMatch) {
+                        exp = expMatch[1];
+                    } else {
+                        // Look for any number that's not 1, 2, 3, or 4 (common root indices)
+                        const nums = s.replace(/[⁴³√]|4th|sqrt|cbrt/gi, '').match(/\d+/g) || [];
+                        const significantNums = nums.filter(n => !['1', '2', '3', '4'].includes(n) || 
+                            (nums.length === 1 && n !== '1')); // Keep if it's the only number and not 1
+                        if (significantNums.length > 0) {
+                            exp = significantNums.sort().join(',');
+                        }
+                    }
+                    
+                    // If exp is still empty but we have nums, check if any > 1
+                    if (!exp) {
+                        const allNums = s.replace(/4th/gi, '').match(/\d+/g) || [];
+                        const bigNums = allNums.filter(n => parseInt(n) > 1 && n !== rootIdx);
+                        if (bigNums.length > 0) {
+                            exp = bigNums.sort().join(',');
+                        }
+                    }
+                    
+                    return `R${rootIdx}:${vars}:${exp}`;
+                };
+                
+                const userSuper = superFinal(rawUserAnswer, true);
+                const correctSuper = superFinal(state.currentProblem.answer, false);
+                
+                console.log('SUPER FINAL - user:', userSuper, 'correct:', correctSuper);
+                
+                if (userSuper === correctSuper) {
+                    isCorrect = true;
+                }
+            }
+            
+            const editor = document.getElementById('mathEditor');
             const feedback = document.getElementById('feedback');
             
             state.stats.total++;
@@ -1027,14 +2675,14 @@
             if (isCorrect) {
                 state.stats.correct++;
                 state.stats.streak++;
-                input.className = 'answer-input correct';
+                editor.classList.add('correct');
                 feedback.className = 'feedback correct show';
                 document.getElementById('feedbackIcon').textContent = '✓';
                 document.getElementById('feedbackTitle').textContent = 'Correct!';
             } else {
                 state.stats.incorrect++;
                 state.stats.streak = 0;
-                input.className = 'answer-input incorrect';
+                editor.classList.add('incorrect');
                 feedback.className = 'feedback incorrect show';
                 document.getElementById('feedbackIcon').textContent = '✗';
                 document.getElementById('feedbackTitle').textContent = `Incorrect. Answer: ${state.currentProblem.answer}`;
@@ -1070,14 +2718,31 @@
         document.getElementById('submitBtn').addEventListener('click', checkAnswer);
         document.getElementById('nextBtn').addEventListener('click', nextProblem);
 
-        document.getElementById('answerInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (document.getElementById('feedback').classList.contains('show')) {
-                    nextProblem();
-                } else {
-                    checkAnswer();
+        // Math keyboard handlers
+        document.querySelectorAll('.math-key').forEach(key => {
+            key.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = key.dataset.action;
+                const template = key.dataset.template;
+                const char = key.dataset.char;
+                
+                if (action === 'backspace') {
+                    backspaceSlot();
+                    document.getElementById('mathEditor').focus();
+                } else if (action === 'clear') {
+                    clearEditor();
+                    document.getElementById('mathEditor').focus();
+                } else if (action === 'left') {
+                    navigateSlot('left');
+                } else if (action === 'right') {
+                    navigateSlot('right');
+                } else if (template) {
+                    insertTemplate(template);
+                } else if (char) {
+                    insertIntoSlot(char);
+                    document.getElementById('mathEditor').focus();
                 }
-            }
+            });
         });
 
         document.querySelectorAll('.topic-btn').forEach(btn => {
@@ -1096,6 +2761,7 @@
         });
 
         // Initialize
+        initEditor();
         nextProblem();
     </script>
 </body>
